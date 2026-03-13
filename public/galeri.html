@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gallery - Bakery Delight</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+  <script>tailwind.config={theme:{extend:{colors:{primary:'#c8873a',dark:'#2c1a0e',cream:'#fdf6ee'}}}}</script>
+  <style>body{font-family:'Lato',sans-serif}</style>
+</head>
+<body class="bg-cream">
+  <div id="noticeBar" class="bg-primary text-white text-center text-sm py-2 px-4"></div>
+  <header class="bg-white shadow-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="flex items-center justify-between h-16">
+        <a href="/" class="font-serif text-2xl font-bold text-dark" style="font-family:'Playfair Display',serif">Bakery<span class="text-primary">Delight</span></a>
+        <nav class="hidden md:flex items-center gap-8">
+          <a href="/" class="text-dark hover:text-primary">Beranda</a>
+          <a href="/produk" class="text-dark hover:text-primary">Produk</a>
+          <a href="/tentang" class="text-dark hover:text-primary">Tentang Kami</a>
+          <a href="/ulasan" class="text-dark hover:text-primary">Ulasan</a>
+          <a href="/galeri" class="text-primary font-semibold border-b-2 border-primary pb-1">Gallery</a>
+        </nav>
+        <button class="md:hidden text-dark" onclick="document.getElementById('mobileNav').classList.toggle('hidden')"><i class="fas fa-bars text-xl"></i></button>
+      </div>
+    </div>
+    <div id="mobileNav" class="hidden md:hidden bg-white border-t px-4 py-3 space-y-2">
+      <a href="/" class="block py-2 text-dark">Beranda</a>
+      <a href="/produk" class="block py-2 text-dark">Produk</a>
+      <a href="/tentang" class="block py-2 text-dark">Tentang Kami</a>
+      <a href="/ulasan" class="block py-2 text-dark">Ulasan</a>
+      <a href="/galeri" class="block py-2 text-primary font-semibold">Gallery</a>
+    </div>
+  </header>
+
+  <div class="bg-dark text-white py-12 text-center">
+    <h1 class="font-serif text-4xl font-bold" style="font-family:'Playfair Display',serif">Gallery</h1>
+    <p class="text-white/60 mt-2">Momen-momen indah dari dapur kami</p>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="max-w-7xl mx-auto px-4 py-6">
+    <div class="flex flex-wrap gap-2" id="filterTabs">
+      <button class="filter-tab active px-4 py-2 rounded-full text-sm font-medium border border-primary bg-primary text-white" data-cat="all">Semua</button>
+      <button class="filter-tab px-4 py-2 rounded-full text-sm font-medium border border-gray-300 text-dark hover:border-primary hover:text-primary transition-colors" data-cat="produk">Produk</button>
+      <button class="filter-tab px-4 py-2 rounded-full text-sm font-medium border border-gray-300 text-dark hover:border-primary hover:text-primary transition-colors" data-cat="toko">Toko</button>
+      <button class="filter-tab px-4 py-2 rounded-full text-sm font-medium border border-gray-300 text-dark hover:border-primary hover:text-primary transition-colors" data-cat="event">Event</button>
+    </div>
+  </div>
+
+  <main class="max-w-7xl mx-auto px-4 pb-16">
+    <div id="galleryGrid" class="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4"></div>
+    <div id="emptyMsg" class="hidden text-center text-gray-400 py-20">
+      <i class="fas fa-images text-5xl mb-4"></i>
+      <p>Belum ada foto di gallery</p>
+    </div>
+  </main>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onclick="closeLightbox()">
+    <button class="absolute top-4 right-4 text-white text-2xl"><i class="fas fa-times"></i></button>
+    <img id="lightboxImg" src="" class="max-w-full max-h-full object-contain rounded-lg" onclick="event.stopPropagation()" />
+    <div id="lightboxCaption" class="absolute bottom-8 text-white text-center"></div>
+  </div>
+
+  <footer class="bg-dark text-white py-10">
+    <div class="max-w-7xl mx-auto px-4 text-center text-white/40 text-sm">
+      <p>&copy; 2025 Bakery Delight. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    let allGallery = [], currentCat = 'all';
+
+    async function loadGallery() {
+      const res = await fetch('/api/gallery');
+      allGallery = await res.json();
+      renderGallery(allGallery);
+    }
+
+    function renderGallery(items) {
+      const grid = document.getElementById('galleryGrid');
+      const emptyMsg = document.getElementById('emptyMsg');
+      if (items.length === 0) {
+        grid.innerHTML = '';
+        emptyMsg.classList.remove('hidden');
+        return;
+      }
+      emptyMsg.classList.add('hidden');
+      grid.innerHTML = items.map(g => `
+        <div class="break-inside-avoid cursor-pointer group" onclick="openLightbox('${g.image}','${g.title}')">
+          <div class="rounded-2xl overflow-hidden relative">
+            <img src="${g.image || 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400'}" alt="${g.title}" class="w-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            <div class="absolute inset-0 bg-dark/0 group-hover:bg-dark/40 transition-all duration-300 flex items-center justify-center">
+              <i class="fas fa-expand text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity"></i>
+            </div>
+          </div>
+          <p class="text-sm text-center text-dark font-medium mt-2 px-1">${g.title}</p>
+        </div>
+      `).join('');
+    }
+
+    function openLightbox(src, title) {
+      document.getElementById('lightboxImg').src = src;
+      document.getElementById('lightboxCaption').textContent = title;
+      document.getElementById('lightbox').classList.remove('hidden');
+    }
+    function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
+
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.filter-tab').forEach(t => { t.classList.remove('bg-primary','text-white','border-primary'); t.classList.add('border-gray-300','text-dark'); });
+        tab.classList.add('bg-primary','text-white','border-primary');
+        tab.classList.remove('border-gray-300','text-dark');
+        const cat = tab.dataset.cat;
+        renderGallery(cat === 'all' ? allGallery : allGallery.filter(g => g.category === cat));
+      });
+    });
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+    fetch('/api/auth/settings').then(r => r.json()).then(s => {
+      if (s.notice_bar) document.getElementById('noticeBar').textContent = s.notice_bar;
+    });
+    loadGallery();
+  </script>
+</body>
+</html>

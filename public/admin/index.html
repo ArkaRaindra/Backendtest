@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel - Bakery Delight</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet"/>
+  <script>tailwind.config={theme:{extend:{colors:{primary:'#f8a5a5',accent:'#e77e7e',yellow:'#f5cd79',dark:'#333333',bgmain:'#fffaf5',bgsec:'#fff5f0',brd:'#e8d5d0',sidebar:'#2c1a0e'}}}}</script>
+  <style>
+    body{font-family:'Lato',sans-serif;}
+    .sl{transition:all .2s;border-left:3px solid transparent;}
+    .sl.active,.sl:hover{background:rgba(232,120,120,.15);color:#f8a5a5;border-left-color:#e77e7e;}
+    .page{display:none;}.page.active{display:block;}
+    .modal-box{display:none;}.modal-box.open{display:flex;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .fade{animation:fadeIn .3s ease;}
+  </style>
+</head>
+<body class="bg-bgmain text-dark">
+
+  <!-- Login -->
+  <div id="loginScreen" class="fixed inset-0 flex items-center justify-center z-50" style="background:#2c1a0e">
+    <div class="bg-white rounded-2xl p-10 w-full max-w-sm shadow-2xl">
+      <div class="text-center mb-8">
+        <div class="font-serif text-3xl font-bold"><span class="text-accent">Bakery</span><span class="text-yellow">Delight</span></div>
+        <p class="text-gray-400 text-sm mt-2">Admin Panel — Silakan masuk</p>
+      </div>
+      <div id="loginError" class="hidden bg-red-50 border border-red-200 text-red-600 rounded-xl p-3 mb-4 text-sm text-center"></div>
+      <div class="space-y-4">
+        <div><label class="block text-sm font-medium mb-1">Username</label><input id="loginUser" type="text" class="w-full border border-brd rounded-xl px-4 py-3 text-sm outline-none focus:border-accent" placeholder="admin"/></div>
+        <div><label class="block text-sm font-medium mb-1">Password</label><input id="loginPass" type="password" class="w-full border border-brd rounded-xl px-4 py-3 text-sm outline-none focus:border-accent" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()"/></div>
+        <button onclick="login()" class="w-full bg-accent hover:bg-yellow hover:text-dark text-white py-3 rounded-xl font-bold transition-all">Masuk</button>
+        <p class="text-center text-xs text-gray-400">Default: admin / admin123</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- App -->
+  <div id="mainApp" class="hidden h-screen overflow-hidden" style="display:none;flex-direction:row">
+    <!-- Sidebar -->
+    <aside class="w-60 flex-shrink-0 flex flex-col" style="background:#2c1a0e">
+      <div class="p-5 border-b border-white/10">
+        <div class="font-serif font-bold text-xl"><span class="text-accent">Bakery</span><span class="text-yellow">Delight</span></div>
+        <p class="text-white/40 text-xs mt-1">Panel Admin</p>
+      </div>
+      <nav class="flex-1 py-4 px-3 space-y-0.5">
+        <button onclick="showPage('dashboard')" class="sl active w-full text-left flex items-center gap-3 px-4 py-3 text-white/70 text-sm" data-page="dashboard"><i class="fas fa-tachometer-alt w-4"></i> Dashboard</button>
+        <button onclick="showPage('products')"  class="sl w-full text-left flex items-center gap-3 px-4 py-3 text-white/70 text-sm" data-page="products"><i class="fas fa-bread-slice w-4"></i> Produk</button>
+        <button onclick="showPage('reviews')"   class="sl w-full text-left flex items-center gap-3 px-4 py-3 text-white/70 text-sm" data-page="reviews"><i class="fas fa-star w-4"></i> Ulasan</button>
+        <button onclick="showPage('gallery')"   class="sl w-full text-left flex items-center gap-3 px-4 py-3 text-white/70 text-sm" data-page="gallery"><i class="fas fa-images w-4"></i> Gallery</button>
+        <button onclick="showPage('orders')"    class="sl w-full text-left flex items-center gap-3 px-4 py-3 text-white/70 text-sm" data-page="orders"><i class="fas fa-shopping-bag w-4"></i> Pesanan</button>
+        <button onclick="showPage('settings')"  class="sl w-full text-left flex items-center gap-3 px-4 py-3 text-white/70 text-sm" data-page="settings"><i class="fas fa-cog w-4"></i> Pengaturan</button>
+      </nav>
+      <div class="p-4 border-t border-white/10">
+        <div class="flex items-center gap-2 mb-3">
+          <div class="w-8 h-8 bg-accent rounded-full flex items-center justify-center text-white text-sm font-bold">A</div>
+          <div><p id="adminName" class="text-white text-sm font-medium">Admin</p><p class="text-white/40 text-xs">Administrator</p></div>
+        </div>
+        <button onclick="logout()" class="text-white/40 hover:text-red-400 text-sm flex items-center gap-2 transition-colors"><i class="fas fa-sign-out-alt"></i> Keluar</button>
+      </div>
+    </aside>
+
+    <!-- Content area -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+      <div class="bg-white shadow-sm px-6 py-4 flex items-center justify-between border-b border-brd">
+        <div><h2 id="pageTitle" class="text-lg font-bold text-dark">Dashboard</h2><p class="text-xs text-gray-400">Bakery Delight Admin</p></div>
+        <a href="/" target="_blank" class="text-sm text-accent hover:text-yellow flex items-center gap-1 transition-colors"><i class="fas fa-external-link-alt"></i> Lihat Website</a>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-6 bg-bgmain">
+
+        <!-- DASHBOARD -->
+        <div id="page-dashboard" class="page active fade">
+          <div class="grid grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-brd">
+              <div class="flex items-center justify-between"><div><p class="text-gray-400 text-xs uppercase tracking-wide">Produk</p><p id="stProd" class="text-3xl font-bold mt-1">0</p></div><div class="w-11 h-11 bg-primary/30 rounded-xl flex items-center justify-center"><i class="fas fa-bread-slice text-accent"></i></div></div>
+            </div>
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-brd">
+              <div class="flex items-center justify-between"><div><p class="text-gray-400 text-xs uppercase tracking-wide">Ulasan</p><p id="stRev" class="text-3xl font-bold mt-1">0</p></div><div class="w-11 h-11 bg-yellow/30 rounded-xl flex items-center justify-center"><i class="fas fa-star text-yellow"></i></div></div>
+            </div>
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-brd">
+              <div class="flex items-center justify-between"><div><p class="text-gray-400 text-xs uppercase tracking-wide">Pesanan</p><p id="stOrd" class="text-3xl font-bold mt-1">0</p></div><div class="w-11 h-11 bg-blue-100 rounded-xl flex items-center justify-center"><i class="fas fa-shopping-bag text-blue-500"></i></div></div>
+            </div>
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-brd">
+              <div class="flex items-center justify-between"><div><p class="text-gray-400 text-xs uppercase tracking-wide">Pendapatan</p><p id="stRev2" class="text-xl font-bold mt-1">Rp 0</p></div><div class="w-11 h-11 bg-green-100 rounded-xl flex items-center justify-center"><i class="fas fa-money-bill-wave text-green-500"></i></div></div>
+            </div>
+          </div>
+          <div class="bg-white rounded-2xl p-6 shadow-sm border border-brd">
+            <h3 class="font-bold text-dark mb-4">Pesanan Terbaru</h3>
+            <div id="recentOrders"></div>
+          </div>
+        </div>
+
+        <!-- PRODUCTS -->
+        <div id="page-products" class="page fade">
+          <div class="flex items-center justify-between mb-5">
+            <h3 class="font-bold text-lg text-dark">Manajemen Produk</h3>
+            <button onclick="openProductModal()" class="bg-accent hover:bg-yellow hover:text-dark text-white px-5 py-2.5 rounded-xl font-medium text-sm transition-all flex items-center gap-2"><i class="fas fa-plus"></i> Tambah Produk</button>
+          </div>
+          <div class="bg-white rounded-2xl shadow-sm border border-brd overflow-hidden">
+            <div class="p-4 border-b border-brd flex gap-3 flex-wrap">
+              <input id="pSearch" type="text" placeholder="Cari produk..." class="flex-1 min-w-32 border border-brd rounded-xl px-4 py-2 text-sm outline-none focus:border-accent" oninput="filterProdTable()"/>
+              <select id="pCatF" class="border border-brd rounded-xl px-3 py-2 text-sm outline-none focus:border-accent bg-white" onchange="filterProdTable()">
+                <option value="">Semua Kategori</option>
+                <option value="roti">Roti</option><option value="pastry">Pastry</option><option value="kue">Kue</option><option value="tanpa-bahan">Tanpa Bahan</option>
+              </select>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead class="bg-bgsec text-gray-400 text-xs uppercase tracking-wide">
+                  <tr><th class="px-4 py-3 text-left">Produk</th><th class="px-4 py-3 text-left">Kategori</th><th class="px-4 py-3 text-left">Harga</th><th class="px-4 py-3 text-left">Stok</th><th class="px-4 py-3 text-left">Status</th><th class="px-4 py-3 text-left">Aksi</th></tr>
+                </thead>
+                <tbody id="prodTableBody" class="divide-y divide-brd"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- REVIEWS -->
+        <div id="page-reviews" class="page fade">
+          <h3 class="font-bold text-lg text-dark mb-5">Manajemen Ulasan</h3>
+          <div id="reviewsList" class="space-y-4"></div>
+        </div>
+
+        <!-- GALLERY -->
+        <div id="page-gallery" class="page fade">
+          <div class="flex items-center justify-between mb-5">
+            <h3 class="font-bold text-lg text-dark">Manajemen Gallery</h3>
+            <button onclick="openGalleryModal()" class="bg-accent hover:bg-yellow hover:text-dark text-white px-5 py-2.5 rounded-xl font-medium text-sm transition-all flex items-center gap-2"><i class="fas fa-plus"></i> Tambah Foto</button>
+          </div>
+          <div id="galleryGrid" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+        </div>
+
+        <!-- ORDERS -->
+        <div id="page-orders" class="page fade">
+          <h3 class="font-bold text-lg text-dark mb-5">Manajemen Pesanan</h3>
+          <div class="bg-white rounded-2xl shadow-sm border border-brd overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead class="bg-bgsec text-gray-400 text-xs uppercase tracking-wide">
+                  <tr><th class="px-4 py-3 text-left">#</th><th class="px-4 py-3 text-left">Pelanggan</th><th class="px-4 py-3 text-left">Item</th><th class="px-4 py-3 text-left">Total</th><th class="px-4 py-3 text-left">Status</th><th class="px-4 py-3 text-left">Tanggal</th><th class="px-4 py-3 text-left">Ubah Status</th></tr>
+                </thead>
+                <tbody id="ordersBody" class="divide-y divide-brd"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SETTINGS -->
+        <div id="page-settings" class="page fade">
+          <h3 class="font-bold text-lg text-dark mb-5">Pengaturan Toko</h3>
+          <div class="bg-white rounded-2xl p-6 shadow-sm border border-brd max-w-2xl">
+            <div id="settingSaved" class="hidden bg-green-100 border border-green-300 text-green-700 rounded-xl p-3 mb-5 text-sm text-center"><i class="fas fa-check-circle mr-1"></i>Tersimpan!</div>
+            <div class="space-y-4">
+              <div><label class="block text-sm font-medium mb-1">Nama Toko</label><input id="s_store_name" type="text" class="w-full border border-brd rounded-xl px-4 py-2.5 text-sm outline-none focus:border-accent"/></div>
+              <div><label class="block text-sm font-medium mb-1">Telepon/WhatsApp</label><input id="s_store_phone" type="text" class="w-full border border-brd rounded-xl px-4 py-2.5 text-sm outline-none focus:border-accent"/></div>
+              <div><label class="block text-sm font-medium mb-1">Email</label><input id="s_store_email" type="email" class="w-full border border-brd rounded-xl px-4 py-2.5 text-sm outline-none focus:border-accent"/></div>
+              <div><label class="block text-sm font-medium mb-1">Jam Operasional</label><input id="s_store_hours" type="text" class="w-full border border-brd rounded-xl px-4 py-2.5 text-sm outline-none focus:border-accent"/></div>
+              <div><label class="block text-sm font-medium mb-1">Alamat</label><textarea id="s_store_address" rows="2" class="w-full border border-brd rounded-xl px-4 py-2.5 text-sm outline-none focus:border-accent resize-none"></textarea></div>
+              <div><label class="block text-sm font-medium mb-1">Teks Notice Bar</label><input id="s_notice_bar" type="text" class="w-full border border-brd rounded-xl px-4 py-2.5 text-sm outline-none focus:border-accent"/></div>
+              <button onclick="saveSettings()" class="bg-accent hover:bg-yellow hover:text-dark text-white px-6 py-2.5 rounded-xl font-bold text-sm transition-all"><i class="fas fa-save mr-2"></i>Simpan</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Modal -->
+  <div id="productModal" class="modal-box fixed inset-0 bg-black/60 z-50 items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div class="flex items-center justify-between p-5 border-b border-brd bg-accent text-white rounded-t-2xl">
+        <h3 id="pModalTitle" class="font-bold">Tambah Produk</h3>
+        <button onclick="closeProductModal()" class="text-xl hover:opacity-70"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="p-5 space-y-4">
+        <input type="hidden" id="editProdId"/>
+        <div><label class="block text-sm font-medium mb-1">Nama Produk *</label><input id="pName" type="text" class="w-full border border-brd rounded-xl px-4 py-2.5 text-sm outline-none focus:border-accent"/></div>
+        <div class="grid grid-cols-2 gap-4">
+          <div><label class="block text-sm font-medium mb-1">Harga (Rp) *</label><input id="pPrice" type="number" class="w-full border border-brd rounded-xl px-4 py-2.5 text-sm outline-none focus:border-accent"/></div>
+          <div><label class="block text-sm font-medium mb-1">Stok</label><input id="pStock" type="number" class="w-full border border-brd rounded-xl px-4 py-2.5 text-sm outline-none focus:border-accent"/></div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div><label class="block text-sm font-medium mb-1">Kategori *</label>
+            <select id="pCat" class="w-full border border-brd rounded-xl px-4 py-2.5 text-sm outline-none focus:border-accent bg-white">
+              <option value="roti">Roti Tawar</option><option value="pastry">Pastry</option><option value="kue">Kue</option><option value="tanpa-bahan">Tanpa Bahan Pengawet</option>
+            </select></div>
+          <div><label class="block text-sm font-medium mb-1">Status</label>
+            <select id="pStatus" class="w-full border border-brd rounded-xl px-4 py-2.5 text-sm outline-none focus:border-accent bg-white">
+              <option value="tersedia">Tersedia</option><option value="preorder">Pre-order</option><option value="habis">Habis</option>
+            </select></div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2">Label Khusus</label>
+          <div class="flex flex-wrap gap-3">
+            <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="checkbox" name="pSpecial" value="terlaris" class="accent-accent"/> Terlaris</label>
+            <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="checkbox" name="pSpecial" value="baru"     class="accent-accent"/> Baru</label>
+            <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="checkbox" name="pSpecial" value="vegan"    class="accent-accent"/> Vegan</label>
+            <label class="flex items-center gap-1.5 text-sm cursor-pointer"><input type="checkbox" name="pSpecial" value="rendah-gula" class="accent-accent"/> Rendah Gula</label>
+          </div>
+        </div>
+        <div><label class="block text-sm font-medium mb-1">Deskripsi</label><textarea id="pDesc" rows="3" class="w-full border border-brd rounded-xl px-4 py-2.5 text-sm outline-none focus:border-accent resize-none"></textarea></div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Foto Produk</label>
+          <input id="pImg" type="file" accept="image/*" class="w-full border border-brd rounded-xl px-4 py-2 text-sm"/>
+          <div id="curImg" class="mt-2 hidden"><img id="curImgPrev" src="" class="w-20 h-20 object-cover rounded-xl border border-brd"/><p class="text-xs text-gray-400 mt-1">Foto saat ini</p></div>
+        </div>
+        <div class="flex gap-3 pt-2">
+          <button onclick="closeProductModal()" class="flex-1 border border-brd text-gray-500 py-2.5 rounded-xl text-sm hover:bg-bgsec">Batal</button>
+          <button onclick="saveProduct()" class="flex-1 bg-accent hover:bg-yellow hover:text-dark text-white py-2.5 rounded-xl text-sm font-bold transition-all">Simpan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gallery Modal -->
+  <div id="galleryModal" class="modal-box fixed inset-0 bg-black/60 z-50 items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+      <div class="bg-accent text-white p-5 flex items-center justify-between rounded-t-2xl">
+        <h3 class="font-bold">Tambah Foto Gallery</h3>
+        <button onclick="closeGalleryModal()" class="text-xl hover:opacity-70"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="p-5 space-y-4">
+        <div><label class="block text-sm font-medium mb-1">Judul *</label><input id="gTitle" type="text" class="w-full border border-brd rounded-xl px-4 py-2.5 text-sm outline-none focus:border-accent"/></div>
+        <div><label class="block text-sm font-medium mb-1">Kategori</label>
+          <select id="gCat" class="w-full border border-brd rounded-xl px-4 py-2.5 text-sm outline-none bg-white">
+            <option value="umum">Umum</option><option value="produk">Produk</option><option value="toko">Toko</option><option value="event">Event</option>
+          </select></div>
+        <div><label class="block text-sm font-medium mb-1">File Foto *</label><input id="gImg" type="file" accept="image/*" class="w-full border border-brd rounded-xl px-4 py-2 text-sm"/></div>
+        <div class="flex gap-3">
+          <button onclick="closeGalleryModal()" class="flex-1 border border-brd text-gray-500 py-2.5 rounded-xl text-sm hover:bg-bgsec">Batal</button>
+          <button onclick="saveGallery()" class="flex-1 bg-accent hover:bg-yellow hover:text-dark text-white py-2.5 rounded-xl text-sm font-bold transition-all">Upload</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const A = '/api';
+    let products=[], reviews=[], orders=[], gallery=[];
+
+    function statusBadge(s) {
+      return s==='pending' ? 'bg-yellow/50 text-yellow-800' : s==='completed' ? 'bg-green-100 text-green-700' : s==='cancelled' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-700';
+    }
+
+    async function checkAuth() {
+      const r=await fetch(`${A}/auth/check`);
+      const d=await r.json();
+      if(d.loggedIn){
+        document.getElementById('loginScreen').style.display='none';
+        const app=document.getElementById('mainApp');
+        app.classList.remove('hidden'); app.style.display='flex';
+        document.getElementById('adminName').textContent=d.name;
+        loadDashboard();
+      }
+    }
+
+    async function login() {
+      const user=document.getElementById('loginUser').value.trim();
+      const pass=document.getElementById('loginPass').value;
+      const err=document.getElementById('loginError');
+      err.classList.add('hidden');
+      if(!user||!pass){err.textContent='Isi username dan password';err.classList.remove('hidden');return;}
+      const r=await fetch(`${A}/auth/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:user,password:pass})});
+      const d=await r.json();
+      if(r.ok){
+        document.getElementById('loginScreen').style.display='none';
+        const app=document.getElementById('mainApp');
+        app.classList.remove('hidden'); app.style.display='flex';
+        document.getElementById('adminName').textContent=d.name;
+        loadDashboard();
+      } else { err.textContent=d.error||'Login gagal'; err.classList.remove('hidden'); }
+    }
+
+    async function logout() {
+      await fetch(`${A}/auth/logout`,{method:'POST'});
+      document.getElementById('mainApp').style.display='none';
+      document.getElementById('loginScreen').style.display='flex';
+    }
+
+    function showPage(page) {
+      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+      document.querySelectorAll('.sl').forEach(l=>l.classList.remove('active'));
+      document.getElementById(`page-${page}`).classList.add('active');
+      document.querySelector(`[data-page="${page}"]`).classList.add('active');
+      const titles={dashboard:'Dashboard',products:'Manajemen Produk',reviews:'Manajemen Ulasan',gallery:'Manajemen Gallery',orders:'Manajemen Pesanan',settings:'Pengaturan'};
+      document.getElementById('pageTitle').textContent=titles[page];
+      if(page==='dashboard') loadDashboard();
+      else if(page==='products') loadProducts();
+      else if(page==='reviews') loadReviews();
+      else if(page==='gallery') loadGallery();
+      else if(page==='orders') loadOrders();
+      else if(page==='settings') loadSettings();
+    }
+
+    async function loadDashboard() {
+      const r=await fetch(`${A}/orders/stats`);
+      const s=await r.json();
+      document.getElementById('stProd').textContent=s.totalProducts;
+      document.getElementById('stRev').textContent=s.totalReviews;
+      document.getElementById('stOrd').textContent=s.totalOrders;
+      document.getElementById('stRev2').textContent=`Rp ${s.totalRevenue.toLocaleString('id-ID')}`;
+      const el=document.getElementById('recentOrders');
+      if(!s.recentOrders.length){el.innerHTML='<p class="text-center text-gray-400 py-6 text-sm">Belum ada pesanan</p>';return;}
+      el.innerHTML=s.recentOrders.map(o=>`
+        <div class="flex items-center justify-between p-3 bg-bgsec rounded-xl border border-brd mb-2">
+          <div><p class="font-semibold text-sm">${o.customer_name}</p><p class="text-xs text-gray-400">${o.customer_phone||''}</p></div>
+          <div class="text-right"><p class="font-bold text-accent text-sm">Rp ${o.total.toLocaleString('id-ID')}</p><span class="text-xs px-2 py-0.5 rounded-full ${statusBadge(o.status)}">${o.status}</span></div>
+        </div>
+      `).join('');
+    }
+
+    async function loadProducts() {
+      const r=await fetch(`${A}/products`);
+      products=await r.json();
+      renderProdTable(products);
+    }
+
+    function filterProdTable() {
+      const q=document.getElementById('pSearch').value.toLowerCase();
+      const c=document.getElementById('pCatF').value;
+      renderProdTable(products.filter(p=>(!q||p.name.toLowerCase().includes(q))&&(!c||p.category===c)));
+    }
+
+    function renderProdTable(prods) {
+      const tb=document.getElementById('prodTableBody');
+      if(!prods.length){tb.innerHTML='<tr><td colspan="6" class="text-center py-8 text-gray-400">Tidak ada produk</td></tr>';return;}
+      tb.innerHTML=prods.map(p=>`
+        <tr class="hover:bg-bgsec">
+          <td class="px-4 py-3"><div class="flex items-center gap-3">
+            <img src="${p.image||'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=60'}" class="w-10 h-10 rounded-lg object-cover border border-brd"/>
+            <div><p class="font-medium text-sm">${p.name}</p><p class="text-xs text-gray-400 max-w-xs truncate">${p.description}</p></div>
+          </div></td>
+          <td class="px-4 py-3"><span class="text-xs bg-primary/40 text-accent px-2 py-1 rounded-full">${p.category}</span></td>
+          <td class="px-4 py-3 font-bold text-accent text-sm">Rp ${p.price.toLocaleString('id-ID')}</td>
+          <td class="px-4 py-3 text-sm">${p.stock}</td>
+          <td class="px-4 py-3"><span class="text-xs px-2 py-1 rounded-full ${p.status==='tersedia'?'bg-green-100 text-green-700':p.status==='preorder'?'bg-blue-100 text-blue-700':'bg-red-100 text-red-600'}">${p.status}</span></td>
+          <td class="px-4 py-3"><div class="flex gap-2">
+            <button onclick="editProduct(${p.id})" class="text-blue-400 hover:text-blue-600"><i class="fas fa-edit"></i></button>
+            <button onclick="deleteProd(${p.id},'${p.name.replace(/'/g,'')}')" class="text-red-400 hover:text-red-600"><i class="fas fa-trash"></i></button>
+          </div></td>
+        </tr>
+      `).join('');
+    }
+
+    function openProductModal(reset=true) {
+      if(reset){
+        document.getElementById('pModalTitle').textContent='Tambah Produk';
+        document.getElementById('editProdId').value='';
+        ['pName','pPrice','pStock','pDesc'].forEach(id=>document.getElementById(id).value='');
+        document.getElementById('pCat').value='roti';
+        document.getElementById('pStatus').value='tersedia';
+        document.querySelectorAll('input[name="pSpecial"]').forEach(c=>c.checked=false);
+        document.getElementById('curImg').classList.add('hidden');
+      }
+      document.getElementById('productModal').classList.add('open');
+    }
+    function closeProductModal(){document.getElementById('productModal').classList.remove('open');}
+
+    function editProduct(id) {
+      const p=products.find(x=>x.id===id); if(!p) return;
+      document.getElementById('pModalTitle').textContent='Edit Produk';
+      document.getElementById('editProdId').value=p.id;
+      document.getElementById('pName').value=p.name;
+      document.getElementById('pPrice').value=p.price;
+      document.getElementById('pStock').value=p.stock;
+      document.getElementById('pCat').value=p.category;
+      document.getElementById('pStatus').value=p.status;
+      document.getElementById('pDesc').value=p.description;
+      document.querySelectorAll('input[name="pSpecial"]').forEach(c=>c.checked=p.special.includes(c.value));
+      if(p.image){document.getElementById('curImg').classList.remove('hidden');document.getElementById('curImgPrev').src=p.image;}
+      else{document.getElementById('curImg').classList.add('hidden');}
+      openProductModal(false);
+    }
+
+    async function saveProduct() {
+      const id=document.getElementById('editProdId').value;
+      const name=document.getElementById('pName').value.trim();
+      const price=document.getElementById('pPrice').value;
+      if(!name||!price){alert('Nama dan harga wajib diisi');return;}
+      const fd=new FormData();
+      fd.append('name',name); fd.append('price',price);
+      fd.append('stock',document.getElementById('pStock').value||0);
+      fd.append('category',document.getElementById('pCat').value);
+      fd.append('status',document.getElementById('pStatus').value);
+      fd.append('description',document.getElementById('pDesc').value);
+      document.querySelectorAll('input[name="pSpecial"]:checked').forEach(c=>fd.append('special',c.value));
+      const img=document.getElementById('pImg').files[0];
+      if(img) fd.append('image',img);
+      const r=await fetch(id?`${A}/products/${id}`:`${A}/products`,{method:id?'PUT':'POST',body:fd});
+      if(r.ok){closeProductModal();loadProducts();}
+      else alert('Gagal menyimpan');
+    }
+
+    async function deleteProd(id,name) {
+      if(!confirm(`Hapus "${name}"?`)) return;
+      await fetch(`${A}/products/${id}`,{method:'DELETE'});
+      loadProducts();
+    }
+
+    async function loadReviews() {
+      const r=await fetch(`${A}/reviews`);
+      reviews=await r.json();
+      const el=document.getElementById('reviewsList');
+      if(!reviews.length){el.innerHTML='<p class="text-center text-gray-400 py-10">Belum ada ulasan</p>';return;}
+      el.innerHTML=reviews.map(r=>`
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-brd flex gap-4">
+          <div class="w-10 h-10 bg-accent text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">${r.name.charAt(0)}</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between gap-2 flex-wrap">
+              <div><p class="font-semibold text-sm">${r.name}</p><p class="text-xs text-gray-400">${r.date} — <span class="text-accent">${r.product}</span></p></div>
+              <div class="flex items-center gap-2 flex-shrink-0">
+                <span class="text-xs px-2 py-1 rounded-full ${r.approved?'bg-green-100 text-green-700':'bg-gray-100 text-gray-500'}">${r.approved?'Aktif':'Tersembunyi'}</span>
+                <button onclick="toggleReview(${r.id},${r.approved})" class="text-xs border border-brd hover:border-accent px-3 py-1 rounded-full transition-colors">${r.approved?'Sembunyikan':'Tampilkan'}</button>
+                <button onclick="deleteReview(${r.id})" class="text-red-400 hover:text-red-600"><i class="fas fa-trash text-sm"></i></button>
+              </div>
+            </div>
+            <div class="text-yellow text-sm mt-1">${'★'.repeat(Math.floor(r.rating))}</div>
+            <p class="text-sm text-gray-600 mt-2 italic">"${r.text}"</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function toggleReview(id,cur){await fetch(`${A}/reviews/${id}/approve`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({approved:!cur})});loadReviews();}
+    async function deleteReview(id){if(!confirm('Hapus ulasan ini?'))return;await fetch(`${A}/reviews/${id}`,{method:'DELETE'});loadReviews();}
+
+    async function loadGallery() {
+      const r=await fetch(`${A}/gallery`);
+      gallery=await r.json();
+      const grid=document.getElementById('galleryGrid');
+      if(!gallery.length){grid.innerHTML='<p class="col-span-4 text-center text-gray-400 py-10">Belum ada foto</p>';return;}
+      grid.innerHTML=gallery.map(g=>`
+        <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-brd group">
+          <div class="h-36 overflow-hidden bg-bgsec">
+            <img src="${g.image||'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=300'}" alt="${g.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"/>
+          </div>
+          <div class="p-3 flex items-center justify-between">
+            <div><p class="font-medium text-xs truncate">${g.title}</p><p class="text-xs text-gray-400">${g.category}</p></div>
+            <button onclick="deleteGallery(${g.id})" class="text-red-400 hover:text-red-600"><i class="fas fa-trash text-sm"></i></button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openGalleryModal(){document.getElementById('galleryModal').classList.add('open');}
+    function closeGalleryModal(){document.getElementById('galleryModal').classList.remove('open');}
+
+    async function saveGallery() {
+      const title=document.getElementById('gTitle').value.trim();
+      const img=document.getElementById('gImg').files[0];
+      if(!title||!img){alert('Judul dan foto wajib diisi');return;}
+      const fd=new FormData();
+      fd.append('title',title); fd.append('category',document.getElementById('gCat').value); fd.append('image',img);
+      const r=await fetch(`${A}/gallery`,{method:'POST',body:fd});
+      if(r.ok){closeGalleryModal();loadGallery();}
+    }
+
+    async function deleteGallery(id){if(!confirm('Hapus foto ini?'))return;await fetch(`${A}/gallery/${id}`,{method:'DELETE'});loadGallery();}
+
+    async function loadOrders() {
+      const r=await fetch(`${A}/orders`);
+      orders=await r.json();
+      const tb=document.getElementById('ordersBody');
+      if(!orders.length){tb.innerHTML='<tr><td colspan="7" class="text-center py-8 text-gray-400">Belum ada pesanan</td></tr>';return;}
+      tb.innerHTML=orders.map(o=>`
+        <tr class="hover:bg-bgsec">
+          <td class="px-4 py-3 text-sm font-mono text-accent">#${o.id}</td>
+          <td class="px-4 py-3"><p class="font-medium text-sm">${o.customer_name}</p><p class="text-xs text-gray-400">${o.customer_phone||''}</p></td>
+          <td class="px-4 py-3 text-xs text-gray-600 max-w-xs"><p class="line-clamp-2">${o.items.map(i=>`${i.qty||1}x ${i.name||'Produk'}`).join(', ')}</p></td>
+          <td class="px-4 py-3 font-bold text-accent text-sm">Rp ${o.total.toLocaleString('id-ID')}</td>
+          <td class="px-4 py-3"><span class="text-xs px-2 py-1 rounded-full ${statusBadge(o.status)}">${o.status}</span></td>
+          <td class="px-4 py-3 text-xs text-gray-400">${new Date(o.created_at).toLocaleDateString('id-ID')}</td>
+          <td class="px-4 py-3">
+            <select onchange="updateOrderStatus(${o.id},this.value)" class="text-xs border border-brd rounded-lg px-2 py-1 outline-none bg-white">
+              <option value="pending"    ${o.status==='pending'?'selected':''}>Pending</option>
+              <option value="processing" ${o.status==='processing'?'selected':''}>Diproses</option>
+              <option value="completed"  ${o.status==='completed'?'selected':''}>Selesai</option>
+              <option value="cancelled"  ${o.status==='cancelled'?'selected':''}>Batal</option>
+            </select>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function updateOrderStatus(id,status){await fetch(`${A}/orders/${id}/status`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})});}
+
+    async function loadSettings() {
+      const r=await fetch(`${A}/auth/settings`);
+      const s=await r.json();
+      Object.entries(s).forEach(([k,v])=>{const el=document.getElementById(`s_${k}`);if(el)el.value=v;});
+    }
+
+    async function saveSettings() {
+      const s={};
+      ['store_name','store_phone','store_email','store_hours','store_address','notice_bar'].forEach(k=>{const el=document.getElementById(`s_${k}`);if(el)s[k]=el.value;});
+      const r=await fetch(`${A}/auth/settings`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(s)});
+      if(r.ok){const m=document.getElementById('settingSaved');m.classList.remove('hidden');setTimeout(()=>m.classList.add('hidden'),3000);}
+    }
+
+    document.getElementById('productModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeProductModal();});
+    document.getElementById('galleryModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeGalleryModal();});
+
+    checkAuth();
+  </script>
+</body>
+</html>

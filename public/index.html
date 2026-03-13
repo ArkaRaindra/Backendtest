@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bakery Delight - Roti Segar Setiap Hari</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#f8a5a5',
+            accent:  '#e77e7e',
+            yellow:  '#f5cd79',
+            dark:    '#333333',
+            bgmain:  '#fffaf5',
+            bgsec:   '#fff5f0',
+            brd:     '#e8d5d0',
+          },
+          fontFamily: {
+            serif: ['Playfair Display','serif'],
+            sans:  ['Lato','sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family:'Lato',sans-serif; background:#fffaf5; }
+    .hero-bg { background: linear-gradient(135deg,rgba(51,51,51,.65) 0%,rgba(231,126,126,.35) 100%), url('https://images.unsplash.com/photo-1509440159596-0249088772ff?w=1400') center/cover no-repeat; }
+    .cart-sidebar { transform:translateX(100%); transition:transform .3s ease; }
+    .cart-sidebar.open { transform:translateX(0); }
+    .filter-btn.active { background:#e77e7e; color:white; border-color:#e77e7e; }
+    .product-card:hover .pimg { transform:scale(1.05); }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    .fade-in { animation:fadeIn .6s ease forwards; }
+    .modal-box { display:none; } .modal-box.open { display:flex; }
+  </style>
+</head>
+<body class="text-dark">
+
+  <div id="noticeBar" class="bg-accent text-white text-center text-sm py-2 px-4 font-sans"></div>
+
+  <header class="bg-white shadow-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="flex items-center justify-between h-16">
+        <a href="/" class="font-serif text-2xl font-bold"><span class="text-accent">Bakery</span><span class="text-yellow">Delight</span></a>
+        <nav class="hidden md:flex items-center gap-8">
+          <a href="/"        class="text-accent font-semibold border-b-2 border-accent pb-1 text-sm">Beranda</a>
+          <a href="/produk"  class="text-dark hover:text-accent transition-colors text-sm">Produk</a>
+          <a href="/tentang" class="text-dark hover:text-accent transition-colors text-sm">Tentang Kami</a>
+          <a href="/ulasan"  class="text-dark hover:text-accent transition-colors text-sm">Ulasan</a>
+          <a href="/galeri"  class="text-dark hover:text-accent transition-colors text-sm">Gallery</a>
+        </nav>
+        <div class="flex items-center gap-3">
+          <div class="hidden sm:flex items-center bg-gray-100 rounded-full overflow-hidden">
+            <input id="searchInput" type="text" placeholder="Cari produk..." class="bg-transparent px-4 py-2 text-sm outline-none w-36" />
+            <button onclick="doSearch()" class="px-3 py-2 text-gray-400 hover:text-accent"><i class="fas fa-search text-sm"></i></button>
+          </div>
+          <button onclick="toggleCart()" class="relative text-dark hover:text-accent">
+            <i class="fas fa-shopping-cart text-xl"></i>
+            <span id="cartCount" class="absolute -top-2 -right-2 bg-accent text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span>
+          </button>
+          <button class="md:hidden" onclick="document.getElementById('mobileNav').classList.toggle('hidden')"><i class="fas fa-bars text-xl"></i></button>
+        </div>
+      </div>
+    </div>
+    <div id="mobileNav" class="hidden md:hidden bg-white border-t px-4 py-3 space-y-1">
+      <a href="/"        class="block py-2 text-accent font-semibold text-sm">Beranda</a>
+      <a href="/produk"  class="block py-2 text-dark text-sm">Produk</a>
+      <a href="/tentang" class="block py-2 text-dark text-sm">Tentang Kami</a>
+      <a href="/ulasan"  class="block py-2 text-dark text-sm">Ulasan</a>
+      <a href="/galeri"  class="block py-2 text-dark text-sm">Gallery</a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero-bg min-h-[85vh] flex items-center justify-center text-center">
+    <div class="text-white px-4 fade-in">
+      <p class="text-yellow tracking-widest text-sm uppercase mb-4 font-sans">Freshly Baked Daily</p>
+      <h1 class="font-serif text-5xl md:text-7xl font-bold mb-6 leading-tight">Roti Segar<br/>Setiap Hari</h1>
+      <p class="text-white/80 text-lg mb-8 max-w-md mx-auto">Dipanggang dengan cinta, disajikan dengan kehangatan.</p>
+      <div class="flex gap-4 justify-center flex-wrap">
+        <a href="/produk" class="bg-accent hover:bg-yellow hover:text-dark text-white border-2 border-accent hover:border-yellow px-8 py-3 rounded-full font-bold transition-all duration-300 inline-block">Belanja Sekarang</a>
+        <a href="/tentang" class="border-2 border-white text-white hover:bg-white hover:text-dark px-8 py-3 rounded-full font-bold transition-all duration-300 inline-block">Tentang Kami</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="bg-accent text-white py-10">
+    <div class="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+      <div><i class="fas fa-bread-slice text-3xl mb-2 text-yellow"></i><h3 class="font-semibold text-sm">Segar Setiap Hari</h3></div>
+      <div><i class="fas fa-leaf text-3xl mb-2 text-yellow"></i><h3 class="font-semibold text-sm">Bahan Alami</h3></div>
+      <div><i class="fas fa-truck text-3xl mb-2 text-yellow"></i><h3 class="font-semibold text-sm">Gratis Ongkir &gt;Rp100k</h3></div>
+      <div><i class="fas fa-star text-3xl mb-2 text-yellow"></i><h3 class="font-semibold text-sm">Kualitas Terjamin</h3></div>
+    </div>
+  </section>
+
+  <!-- Products -->
+  <section class="py-20 max-w-7xl mx-auto px-4">
+    <h2 class="text-center font-serif text-4xl font-bold text-dark mb-2">Produk Kami</h2>
+    <div class="w-16 h-1 bg-accent mx-auto mb-10"></div>
+    <div class="flex flex-wrap gap-2 justify-center mb-8" id="filterBtns">
+      <button class="filter-btn active px-5 py-2 rounded-full border border-gray-300 text-sm font-medium transition-all" data-filter="all">Semua</button>
+      <button class="filter-btn px-5 py-2 rounded-full border border-gray-300 text-sm font-medium hover:border-accent hover:text-accent transition-all" data-filter="roti">Roti Tawar</button>
+      <button class="filter-btn px-5 py-2 rounded-full border border-gray-300 text-sm font-medium hover:border-accent hover:text-accent transition-all" data-filter="pastry">Pastry</button>
+      <button class="filter-btn px-5 py-2 rounded-full border border-gray-300 text-sm font-medium hover:border-accent hover:text-accent transition-all" data-filter="kue">Kue</button>
+      <button class="filter-btn px-5 py-2 rounded-full border border-gray-300 text-sm font-medium hover:border-accent hover:text-accent transition-all" data-filter="tanpa-bahan">Tanpa Pengawet</button>
+    </div>
+    <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+  </section>
+
+  <!-- Reviews -->
+  <section class="bg-bgsec py-20">
+    <div class="max-w-7xl mx-auto px-4">
+      <h2 class="text-center font-serif text-4xl font-bold text-dark mb-2">Ulasan Pelanggan</h2>
+      <div class="w-16 h-1 bg-accent mx-auto mb-4"></div>
+      <p class="text-center text-gray-500 max-w-md mx-auto mb-10 text-sm">Lihat apa kata pelanggan setia kami tentang produk dan layanan Bakery Delight</p>
+      <div id="reviewsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+      <div class="text-center mt-10">
+        <a href="/ulasan" class="bg-accent hover:bg-yellow hover:text-dark text-white border-2 border-accent hover:border-yellow px-8 py-3 rounded-full font-bold transition-all inline-block">Lihat Semua Ulasan</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-dark text-white pt-14">
+    <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-10">
+      <div>
+        <div class="font-serif text-xl font-bold mb-1"><span class="text-accent">Bakery</span><span class="text-yellow">Delight</span></div>
+        <div class="w-10 h-0.5 bg-accent mt-2 mb-4"></div>
+        <p class="text-white/60 text-sm">Toko roti premium, dipanggang segar setiap hari.</p>
+        <div class="flex gap-2 mt-4">
+          <a href="#" class="w-9 h-9 bg-white/10 hover:bg-blue-600 rounded-full flex items-center justify-center transition-colors"><i class="fab fa-facebook-f text-xs"></i></a>
+          <a href="#" class="w-9 h-9 bg-white/10 hover:bg-pink-500 rounded-full flex items-center justify-center transition-colors"><i class="fab fa-instagram text-xs"></i></a>
+          <a href="#" class="w-9 h-9 bg-white/10 hover:bg-gray-600 rounded-full flex items-center justify-center transition-colors"><i class="fa-brands fa-x-twitter text-xs"></i></a>
+          <a href="#" class="w-9 h-9 bg-white/10 hover:bg-green-500 rounded-full flex items-center justify-center transition-colors"><i class="fab fa-whatsapp text-xs"></i></a>
+        </div>
+      </div>
+      <div>
+        <h4 class="font-semibold mb-1">Link Cepat</h4><div class="w-10 h-0.5 bg-accent mb-4"></div>
+        <div class="space-y-2">
+          <a href="/"        class="block text-white/60 hover:text-accent text-sm">Beranda</a>
+          <a href="/produk"  class="block text-white/60 hover:text-accent text-sm">Produk</a>
+          <a href="/tentang" class="block text-white/60 hover:text-accent text-sm">Tentang Kami</a>
+          <a href="/ulasan"  class="block text-white/60 hover:text-accent text-sm">Ulasan</a>
+          <a href="/galeri"  class="block text-white/60 hover:text-accent text-sm">Gallery</a>
+        </div>
+      </div>
+      <div>
+        <h4 class="font-semibold mb-1">Kategori Produk</h4><div class="w-10 h-0.5 bg-accent mb-4"></div>
+        <div class="space-y-2">
+          <a href="/produk" class="block text-white/60 hover:text-accent text-sm">Roti Tawar</a>
+          <a href="/produk" class="block text-white/60 hover:text-accent text-sm">Pastry</a>
+          <a href="/produk" class="block text-white/60 hover:text-accent text-sm">Kue Ulang Tahun</a>
+          <a href="/produk" class="block text-white/60 hover:text-accent text-sm">Roti Diet</a>
+          <a href="/produk" class="block text-white/60 hover:text-accent text-sm">Kue Tanpa Pengawet</a>
+        </div>
+      </div>
+      <div>
+        <h4 class="font-semibold mb-1">Kontak</h4><div class="w-10 h-0.5 bg-accent mb-4"></div>
+        <div class="space-y-3 text-sm text-white/60">
+          <p id="footerPhone"><i class="fas fa-phone mr-2 text-accent"></i>+62 123 4567 890</p>
+          <p id="footerEmail"><i class="fas fa-envelope mr-2 text-accent"></i>info@bakerydelight.com</p>
+          <p id="footerHours"><i class="fas fa-clock mr-2 text-accent"></i>Buka: 07.00 - 21.00</p>
+          <p id="footerAddress"><i class="fas fa-map-marker-alt mr-2 text-accent"></i>Jl. A.M. Sangaji No.47, Yogyakarta</p>
+        </div>
+      </div>
+    </div>
+    <div class="border-t border-white/10 mt-10 py-5 text-center text-xs text-white/40">
+      &copy; 2025 Bakery Delight. All Rights Reserved.
+    </div>
+  </footer>
+
+  <!-- Cart Overlay -->
+  <div id="cartOverlay" class="fixed inset-0 bg-black/50 z-50 hidden" onclick="toggleCart()"></div>
+
+  <!-- Cart Sidebar -->
+  <div id="cartSidebar" class="cart-sidebar fixed top-0 right-0 h-full w-80 bg-white z-50 shadow-2xl flex flex-col">
+    <div class="flex items-center justify-between p-4 bg-accent text-white">
+      <h2 class="font-semibold">Keranjang Belanja</h2>
+      <button onclick="toggleCart()" class="hover:opacity-70 text-xl"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="cartItems" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
+    <div class="p-4 border-t border-brd bg-bgmain">
+      <div class="flex justify-between font-bold text-lg mb-4">
+        <span>Total:</span>
+        <span id="cartTotal" class="text-accent">Rp 0</span>
+      </div>
+      <button onclick="openCheckoutModal()" class="w-full bg-accent hover:bg-yellow hover:text-dark text-white py-3 rounded-lg font-bold transition-all">
+        <i class="fas fa-credit-card mr-2"></i>Checkout
+      </button>
+    </div>
+  </div>
+
+  <!-- Checkout Modal -->
+  <div id="checkoutModal" class="modal-box fixed inset-0 bg-black/60 z-[60] items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+      <div class="bg-accent text-white p-5 flex items-center justify-between">
+        <h3 class="font-bold text-lg">Lengkapi Pesanan</h3>
+        <button onclick="closeCheckoutModal()" class="text-xl hover:opacity-70"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="p-5 space-y-4">
+        <!-- Order summary -->
+        <div id="ckSummary" class="bg-bgsec rounded-xl p-4 text-sm space-y-1 max-h-36 overflow-y-auto border border-brd"></div>
+        <div>
+          <label class="block text-sm font-semibold mb-1">Nama Lengkap <span class="text-accent">*</span></label>
+          <input id="ckName" type="text" class="w-full border border-brd rounded-xl px-4 py-2.5 text-sm outline-none focus:border-accent" placeholder="Masukkan nama Anda" />
+        </div>
+        <div>
+          <label class="block text-sm font-semibold mb-1">Nomor WhatsApp <span class="text-accent">*</span></label>
+          <input id="ckPhone" type="tel" class="w-full border border-brd rounded-xl px-4 py-2.5 text-sm outline-none focus:border-accent" placeholder="08xx-xxxx-xxxx" />
+        </div>
+        <div>
+          <label class="block text-sm font-semibold mb-1">Email <span class="text-gray-400 font-normal">(opsional)</span></label>
+          <input id="ckEmail" type="email" class="w-full border border-brd rounded-xl px-4 py-2.5 text-sm outline-none focus:border-accent" placeholder="email@anda.com" />
+        </div>
+        <div>
+          <label class="block text-sm font-semibold mb-1">Catatan / Alamat <span class="text-gray-400 font-normal">(opsional)</span></label>
+          <textarea id="ckNotes" rows="2" class="w-full border border-brd rounded-xl px-4 py-2.5 text-sm outline-none focus:border-accent resize-none" placeholder="Alamat pengiriman, permintaan khusus..."></textarea>
+        </div>
+        <div class="flex justify-between font-bold border-t border-brd pt-3">
+          <span>Total:</span>
+          <span id="ckTotal" class="text-accent"></span>
+        </div>
+        <button onclick="submitOrder()" class="w-full bg-accent hover:bg-yellow hover:text-dark text-white py-3 rounded-xl font-bold transition-all">
+          <i class="fas fa-check-circle mr-2"></i>Konfirmasi Pesanan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div id="successModal" class="modal-box fixed inset-0 bg-black/60 z-[70] items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl text-center p-8">
+      <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="fas fa-check text-green-500 text-2xl"></i>
+      </div>
+      <h3 class="font-serif text-xl font-bold text-dark mb-2">Pesanan Diterima!</h3>
+      <p class="text-gray-500 text-sm">Nomor pesanan Anda:</p>
+      <p id="successOrderId" class="text-accent text-2xl font-bold my-3">#0000</p>
+      <p class="text-gray-500 text-sm mb-6">Kami akan menghubungi Anda via WhatsApp untuk konfirmasi pengiriman.</p>
+      <button onclick="document.getElementById('successModal').classList.remove('open')" class="w-full bg-accent hover:bg-yellow hover:text-dark text-white py-3 rounded-xl font-bold transition-all">Tutup</button>
+    </div>
+  </div>
+
+  <script>
+    const API = '';
+    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    let allProducts = [];
+
+    // Settings
+    async function loadSettings() {
+      try {
+        const res = await fetch(`${API}/api/auth/settings`);
+        const s = await res.json();
+        if (s.notice_bar)    document.getElementById('noticeBar').textContent = s.notice_bar;
+        if (s.store_phone)   document.getElementById('footerPhone').innerHTML   = `<i class="fas fa-phone mr-2 text-accent"></i>${s.store_phone}`;
+        if (s.store_email)   document.getElementById('footerEmail').innerHTML   = `<i class="fas fa-envelope mr-2 text-accent"></i>${s.store_email}`;
+        if (s.store_hours)   document.getElementById('footerHours').innerHTML   = `<i class="fas fa-clock mr-2 text-accent"></i>Buka: ${s.store_hours}`;
+        if (s.store_address) document.getElementById('footerAddress').innerHTML = `<i class="fas fa-map-marker-alt mr-2 text-accent"></i>${s.store_address}`;
+      } catch(e) {}
+    }
+
+    // Products
+    async function loadProducts(filter = 'all') {
+      const url = filter === 'all' ? `${API}/api/products` : `${API}/api/products?category=${filter}`;
+      const res = await fetch(url);
+      allProducts = await res.json();
+      renderProducts(allProducts);
+    }
+
+    function renderProducts(products) {
+      const grid = document.getElementById('productGrid');
+      if (!products.length) { grid.innerHTML = '<p class="col-span-4 text-center text-gray-400 py-10">Tidak ada produk</p>'; return; }
+      grid.innerHTML = products.slice(0,8).map(p => `
+        <div class="product-card bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition-shadow border border-brd">
+          <div class="overflow-hidden h-48 bg-bgsec">
+            <img src="${p.image || 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400'}"
+                 alt="${p.name}" class="pimg w-full h-full object-cover transition-transform duration-500" />
+          </div>
+          <div class="p-4">
+            <div class="flex flex-wrap gap-1 mb-2">
+              ${p.special.slice(0,2).map(s=>`<span class="text-xs bg-primary/40 text-accent px-2 py-0.5 rounded-full">${s}</span>`).join('')}
+              ${p.status==='preorder'?'<span class="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">Pre-order</span>':''}
+            </div>
+            <h3 class="font-serif font-bold text-dark">${p.name}</h3>
+            <p class="text-xs text-gray-500 mt-1 line-clamp-2">${p.description}</p>
+            <div class="flex items-center justify-between mt-4">
+              <span class="text-accent font-bold text-lg">Rp ${p.price.toLocaleString('id-ID')}</span>
+              <button onclick="addToCart(${p.id})"
+                class="bg-accent hover:bg-yellow hover:text-dark text-white px-4 py-1.5 rounded-full text-sm font-medium transition-all">
+                <i class="fas fa-cart-plus mr-1"></i>Tambah
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Reviews
+    async function loadReviews() {
+      const res = await fetch(`${API}/api/reviews?approved=1`);
+      const reviews = await res.json();
+      document.getElementById('reviewsGrid').innerHTML = reviews.slice(0,3).map(r => `
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-brd">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 bg-accent text-white rounded-full flex items-center justify-center font-bold">${r.name.charAt(0)}</div>
+            <div><p class="font-semibold text-dark text-sm">${r.name}</p><p class="text-xs text-gray-400">${r.date}</p></div>
+          </div>
+          <div class="text-yellow text-lg mb-2">${'★'.repeat(Math.floor(r.rating))}</div>
+          <p class="text-gray-600 text-sm italic">"${r.text}"</p>
+          <p class="text-xs text-accent mt-3">Produk: ${r.product}</p>
+        </div>
+      `).join('') || '<p class="col-span-3 text-center text-gray-400">Belum ada ulasan</p>';
+    }
+
+    // Cart
+    function addToCart(id) {
+      const p = allProducts.find(x => x.id === id); if (!p) return;
+      const ex = cart.find(i => i.id === id);
+      if (ex) ex.qty++; else cart.push({...p, qty:1});
+      saveCart(); updateCartUI(); openCart();
+    }
+    function removeFromCart(id) { cart = cart.filter(i => i.id !== id); saveCart(); updateCartUI(); }
+    function updateQty(id, qty) {
+      const item = cart.find(i => i.id === id); if (!item) return;
+      if (qty < 1) return removeFromCart(id);
+      item.qty = qty; saveCart(); updateCartUI();
+    }
+    function saveCart() { localStorage.setItem('cart', JSON.stringify(cart)); }
+    function updateCartUI() {
+      const count = cart.reduce((s,i) => s+i.qty, 0);
+      const total = cart.reduce((s,i) => s+i.price*i.qty, 0);
+      document.getElementById('cartCount').textContent = count;
+      document.getElementById('cartTotal').textContent = `Rp ${total.toLocaleString('id-ID')}`;
+      const el = document.getElementById('cartItems');
+      if (!cart.length) {
+        el.innerHTML = '<div class="text-center py-12 text-gray-300"><i class="fas fa-shopping-cart text-5xl mb-3 block"></i><p class="text-sm">Keranjang kosong</p></div>';
+      } else {
+        el.innerHTML = cart.map(i => `
+          <div class="flex gap-3 items-center p-3 bg-bgsec rounded-xl border border-brd">
+            <img src="${i.image||'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=80'}" class="w-14 h-14 object-cover rounded-lg flex-shrink-0"/>
+            <div class="flex-1 min-w-0">
+              <p class="font-semibold text-sm text-dark truncate">${i.name}</p>
+              <p class="text-accent text-sm font-bold">Rp ${i.price.toLocaleString('id-ID')}</p>
+              <div class="flex items-center gap-2 mt-1">
+                <button onclick="updateQty(${i.id},${i.qty-1})" class="w-6 h-6 bg-white border border-brd rounded-full text-sm hover:bg-accent hover:text-white hover:border-accent transition-colors leading-none">-</button>
+                <span class="text-sm font-medium w-4 text-center">${i.qty}</span>
+                <button onclick="updateQty(${i.id},${i.qty+1})" class="w-6 h-6 bg-white border border-brd rounded-full text-sm hover:bg-accent hover:text-white hover:border-accent transition-colors leading-none">+</button>
+              </div>
+            </div>
+            <button onclick="removeFromCart(${i.id})" class="text-gray-300 hover:text-accent transition-colors"><i class="fas fa-trash text-sm"></i></button>
+          </div>
+        `).join('');
+      }
+    }
+    function toggleCart() { document.getElementById('cartSidebar').classList.toggle('open'); document.getElementById('cartOverlay').classList.toggle('hidden'); }
+    function openCart()   { document.getElementById('cartSidebar').classList.add('open'); document.getElementById('cartOverlay').classList.remove('hidden'); }
+
+    // Checkout → save to DB
+    function openCheckoutModal() {
+      if (!cart.length) return alert('Keranjang masih kosong!');
+      const total = cart.reduce((s,i) => s+i.price*i.qty, 0);
+      document.getElementById('ckTotal').textContent = `Rp ${total.toLocaleString('id-ID')}`;
+      document.getElementById('ckSummary').innerHTML = cart.map(i =>
+        `<div class="flex justify-between text-sm">
+          <span>${i.qty}× ${i.name}</span>
+          <span class="font-semibold text-accent">Rp ${(i.price*i.qty).toLocaleString('id-ID')}</span>
+        </div>`
+      ).join('');
+      document.getElementById('checkoutModal').classList.add('open');
+    }
+    function closeCheckoutModal() { document.getElementById('checkoutModal').classList.remove('open'); }
+
+    async function submitOrder() {
+      const name  = document.getElementById('ckName').value.trim();
+      const phone = document.getElementById('ckPhone').value.trim();
+      const email = document.getElementById('ckEmail').value.trim();
+      const notes = document.getElementById('ckNotes').value.trim();
+      if (!name)  { alert('Nama harus diisi!'); return; }
+      if (!phone) { alert('Nomor WhatsApp harus diisi!'); return; }
+      const total = cart.reduce((s,i) => s+i.price*i.qty, 0);
+      const items = cart.map(i => ({ id:i.id, name:i.name, price:i.price, qty:i.qty }));
+      try {
+        const res = await fetch('/api/orders', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ customer_name:name, customer_phone:phone, customer_email:email, items, total, notes })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          closeCheckoutModal();
+          // close cart
+          document.getElementById('cartSidebar').classList.remove('open');
+          document.getElementById('cartOverlay').classList.add('hidden');
+          document.getElementById('successOrderId').textContent = `#${data.id}`;
+          document.getElementById('successModal').classList.add('open');
+          cart = []; saveCart(); updateCartUI();
+          ['ckName','ckPhone','ckEmail','ckNotes'].forEach(id => document.getElementById(id).value='');
+        } else { alert('Gagal membuat pesanan, coba lagi.'); }
+      } catch(e) { alert('Koneksi bermasalah, coba lagi.'); }
+    }
+
+    // Search + filters
+    function doSearch() { const q=document.getElementById('searchInput').value.trim(); if(q) window.location.href=`/produk?search=${encodeURIComponent(q)}`; }
+    document.getElementById('searchInput').addEventListener('keypress', e => { if(e.key==='Enter') doSearch(); });
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        loadProducts(btn.dataset.filter);
+      });
+    });
+
+    loadSettings(); loadProducts(); loadReviews(); updateCartUI();
+  </script>
+</body>
+</html>

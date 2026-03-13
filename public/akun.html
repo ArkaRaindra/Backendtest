@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Akun Saya - Bakery Delight</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        colors: { primary:'#f8a5a5', accent:'#e77e7e', yellow:'#f5cd79', dark:'#333333', bgmain:'#fffaf5', bgsec:'#fff5f0', brd:'#e8d5d0' }
+      }}
+    }
+  </script>
+  <style>
+    body { font-family:'Lato',sans-serif; background:#fffaf5; }
+    .tab-btn.active  { background:#e77e7e; color:white; border-color:#e77e7e; }
+    .order-tab.active { display:block; }
+    .order-tab { display:none; }
+    .modal-box { display:none; } .modal-box.open { display:flex; }
+    .step-line::after { content:''; position:absolute; top:50%; left:100%; width:100%; height:2px; background:#e8d5d0; z-index:0; }
+    .step-done .step-dot { background:#e77e7e; border-color:#e77e7e; }
+    .step-done .step-label { color:#e77e7e; font-weight:700; }
+    .step-done .step-line::after { background:#e77e7e; }
+    .step-active .step-dot { background:white; border-color:#e77e7e; box-shadow:0 0 0 4px rgba(231,126,126,.2); }
+    .step-active .step-label { color:#e77e7e; font-weight:700; }
+    .rating-row input { display:none; }
+    .rating-row label { cursor:pointer; color:#d1d5db; font-size:1.6rem; }
+    .rating-row { display:flex; flex-direction:row-reverse; justify-content:flex-end; }
+    .rating-row input:checked~label, .rating-row label:hover, .rating-row label:hover~label { color:#f5cd79; }
+    @keyframes slideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    .slide-up { animation:slideUp .4s ease; }
+  </style>
+</head>
+<body class="text-dark">
+
+  <div id="noticeBar" class="bg-accent text-white text-center text-sm py-2 px-4"></div>
+
+  <header class="bg-white shadow-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="flex items-center justify-between h-16">
+        <a href="/" class="font-serif text-2xl font-bold"><span class="text-accent">Bakery</span><span class="text-yellow">Delight</span></a>
+        <nav class="hidden md:flex items-center gap-8">
+          <a href="/"        class="text-dark hover:text-accent text-sm transition-colors">Beranda</a>
+          <a href="/produk"  class="text-dark hover:text-accent text-sm transition-colors">Produk</a>
+          <a href="/tentang" class="text-dark hover:text-accent text-sm transition-colors">Tentang Kami</a>
+          <a href="/ulasan"  class="text-dark hover:text-accent text-sm transition-colors">Ulasan</a>
+          <a href="/galeri"  class="text-dark hover:text-accent text-sm transition-colors">Gallery</a>
+          <a href="/akun"    class="text-accent font-semibold border-b-2 border-accent pb-1 text-sm">Akun</a>
+        </nav>
+        <div class="flex items-center gap-3">
+          <button onclick="toggleCart()" class="relative text-dark hover:text-accent">
+            <i class="fas fa-shopping-cart text-xl"></i>
+            <span id="cartCount" class="absolute -top-2 -right-2 bg-accent text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span>
+          </button>
+          <button class="md:hidden" onclick="document.getElementById('mobileNav').classList.toggle('hidden')"><i class="fas fa-bars text-xl"></i></button>
+        </div>
+      </div>
+    </div>
+    <div id="mobileNav" class="hidden md:hidden bg-white border-t px-4 py-3 space-y-1">
+      <a href="/"        class="block py-2 text-dark text-sm">Beranda</a>
+      <a href="/produk"  class="block py-2 text-dark text-sm">Produk</a>
+      <a href="/tentang" class="block py-2 text-dark text-sm">Tentang Kami</a>
+      <a href="/ulasan"  class="block py-2 text-dark text-sm">Ulasan</a>
+      <a href="/galeri"  class="block py-2 text-dark text-sm">Gallery</a>
+      <a href="/akun"    class="block py-2 text-accent font-semibold text-sm">Akun</a>
+    </div>
+  </header>
+
+  <!-- LOOKUP SCREEN -->
+  <div id="lookupScreen" class="max-w-lg mx-auto px-4 py-20 slide-up">
+    <div class="bg-white rounded-3xl shadow-lg border border-brd p-10 text-center">
+      <div class="w-20 h-20 bg-primary/30 rounded-full flex items-center justify-center mx-auto mb-5">
+        <i class="fas fa-user text-accent text-3xl"></i>
+      </div>
+      <h1 class="font-serif text-3xl font-bold text-dark mb-2">Akun Saya</h1>
+      <p class="text-gray-500 text-sm mb-8">Masukkan nomor WhatsApp yang digunakan saat memesan untuk melihat pesanan Anda</p>
+
+      <div id="lookupError" class="hidden bg-red-50 border border-red-200 text-red-600 rounded-xl p-3 mb-4 text-sm"></div>
+
+      <div class="relative mb-4">
+        <span class="absolute left-4 top-3.5 text-gray-400 text-sm"><i class="fas fa-phone"></i></span>
+        <input id="phoneInput" type="tel" class="w-full border border-brd rounded-2xl pl-10 pr-4 py-3.5 text-sm outline-none focus:border-accent transition-colors" placeholder="Contoh: 08123456789" onkeydown="if(event.key==='Enter')lookupOrders()"/>
+      </div>
+      <button onclick="lookupOrders()" class="w-full bg-accent hover:bg-yellow hover:text-dark text-white py-3.5 rounded-2xl font-bold transition-all text-sm">
+        <i class="fas fa-search mr-2"></i>Cari Pesanan Saya
+      </button>
+
+      <div class="mt-6 pt-6 border-t border-brd">
+        <p class="text-xs text-gray-400 mb-3">Atau cari dengan nomor pesanan</p>
+        <div class="flex gap-2">
+          <input id="orderIdInput" type="number" class="flex-1 border border-brd rounded-2xl px-4 py-3 text-sm outline-none focus:border-accent" placeholder="Nomor pesanan (contoh: 5)" onkeydown="if(event.key==='Enter')lookupById()"/>
+          <button onclick="lookupById()" class="bg-bgsec hover:bg-primary/30 border border-brd px-4 py-3 rounded-2xl text-sm font-medium transition-colors text-dark">Cari</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACCOUNT SCREEN -->
+  <div id="accountScreen" class="hidden max-w-5xl mx-auto px-4 py-10 slide-up">
+
+    <!-- Profile header -->
+    <div class="bg-white rounded-3xl shadow-sm border border-brd p-6 mb-6">
+      <div class="flex items-center gap-5 flex-wrap">
+        <div class="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center text-white font-bold text-2xl flex-shrink-0" id="profileAvatar">A</div>
+        <div class="flex-1 min-w-0">
+          <h2 id="profileName" class="font-serif text-2xl font-bold text-dark">Nama Pelanggan</h2>
+          <p id="profilePhone" class="text-gray-500 text-sm mt-0.5"><i class="fas fa-phone mr-1 text-accent"></i>0812-xxxx-xxxx</p>
+          <p id="profileEmail" class="text-gray-400 text-xs mt-0.5"></p>
+        </div>
+        <div class="flex gap-4">
+          <div class="text-center">
+            <p id="statTotal" class="font-serif text-2xl font-bold text-accent">0</p>
+            <p class="text-xs text-gray-400">Pesanan</p>
+          </div>
+          <div class="text-center">
+            <p id="statDone" class="font-serif text-2xl font-bold text-yellow">0</p>
+            <p class="text-xs text-gray-400">Selesai</p>
+          </div>
+        </div>
+        <button onclick="logout()" class="text-sm text-gray-400 hover:text-accent transition-colors flex items-center gap-1.5 border border-brd px-4 py-2 rounded-xl hover:border-accent">
+          <i class="fas fa-sign-out-alt"></i> Ganti Akun
+        </button>
+      </div>
+    </div>
+
+    <!-- Order tabs -->
+    <div class="flex flex-wrap gap-2 mb-5">
+      <button class="tab-btn active px-5 py-2.5 rounded-full border border-brd text-sm font-medium transition-all" data-tab="processing" onclick="switchTab('processing',this)">
+        <i class="fas fa-clock mr-1.5"></i>Sedang Diproses <span id="cnt-processing" class="ml-1 bg-accent/20 text-accent text-xs px-1.5 py-0.5 rounded-full font-bold">0</span>
+      </button>
+      <button class="tab-btn px-5 py-2.5 rounded-full border border-brd text-sm font-medium hover:border-accent hover:text-accent transition-all" data-tab="shipped" onclick="switchTab('shipped',this)">
+        <i class="fas fa-truck mr-1.5"></i>Dikirim <span id="cnt-shipped" class="ml-1 bg-yellow/30 text-yellow-700 text-xs px-1.5 py-0.5 rounded-full font-bold">0</span>
+      </button>
+      <button class="tab-btn px-5 py-2.5 rounded-full border border-brd text-sm font-medium hover:border-accent hover:text-accent transition-all" data-tab="completed" onclick="switchTab('completed',this)">
+        <i class="fas fa-check-circle mr-1.5"></i>Selesai &amp; Penilaian <span id="cnt-completed" class="ml-1 bg-green-100 text-green-700 text-xs px-1.5 py-0.5 rounded-full font-bold">0</span>
+      </button>
+    </div>
+
+    <!-- Tab: Processing -->
+    <div id="tab-processing" class="order-tab active space-y-4">
+      <div id="list-processing"></div>
+    </div>
+
+    <!-- Tab: Shipped -->
+    <div id="tab-shipped" class="order-tab space-y-4">
+      <div id="list-shipped"></div>
+    </div>
+
+    <!-- Tab: Completed -->
+    <div id="tab-completed" class="order-tab space-y-4">
+      <div id="list-completed"></div>
+    </div>
+
+  </div>
+
+  <!-- ===== REVIEW MODAL ===== -->
+  <div id="reviewModal" class="modal-box fixed inset-0 bg-black/60 z-[60] items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden">
+      <div class="bg-accent text-white p-5 flex items-center justify-between">
+        <div>
+          <h3 class="font-bold text-lg">Beri Penilaian</h3>
+          <p id="reviewModalOrderId" class="text-white/70 text-xs mt-0.5">Pesanan #0</p>
+        </div>
+        <button onclick="closeReviewModal()" class="text-xl hover:opacity-70"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="p-5 space-y-4">
+        <div id="reviewItemsList" class="space-y-5"></div>
+        <div id="reviewSuccessMsg" class="hidden bg-green-100 border border-green-300 text-green-700 rounded-xl p-3 text-sm text-center">
+          <i class="fas fa-check-circle mr-1"></i>Penilaian berhasil dikirim! Terima kasih.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ORDER DETAIL MODAL -->
+  <div id="detailModal" class="modal-box fixed inset-0 bg-black/60 z-[60] items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
+      <div class="bg-dark text-white p-5 flex items-center justify-between sticky top-0">
+        <h3 class="font-bold text-lg">Detail Pesanan</h3>
+        <button onclick="closeDetailModal()" class="text-xl hover:opacity-70"><i class="fas fa-times"></i></button>
+      </div>
+      <div id="detailContent" class="p-5"></div>
+    </div>
+  </div>
+
+  <!-- Cart Sidebar (minimal) -->
+  <div id="cartOverlay" class="fixed inset-0 bg-black/50 z-50 hidden" onclick="toggleCart()"></div>
+  <div id="cartSidebar" class="fixed top-0 right-0 h-full w-80 bg-white z-50 shadow-2xl flex flex-col" style="transform:translateX(100%);transition:transform .3s ease" id="cartSidebarEl">
+    <div class="flex items-center justify-between p-4 bg-accent text-white">
+      <h2 class="font-semibold">Keranjang Belanja</h2>
+      <button onclick="toggleCart()" class="text-xl hover:opacity-70"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="cartItems" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
+    <div class="p-4 border-t border-brd">
+      <div class="flex justify-between font-bold text-lg mb-3"><span>Total:</span><span id="cartTotal" class="text-accent">Rp 0</span></div>
+      <a href="/produk" class="block w-full bg-accent hover:bg-yellow hover:text-dark text-white py-3 rounded-xl font-bold transition-all text-center text-sm">Tambah Produk</a>
+    </div>
+  </div>
+
+  <footer class="bg-dark text-white py-8 mt-10">
+    <div class="text-center text-white/40 text-xs">&copy; 2025 Bakery Delight. All Rights Reserved.</div>
+  </footer>
+
+  <script>
+    let currentOrders = [];
+    let currentOrderId = null;
+    let cart = JSON.parse(localStorage.getItem('cart')||'[]');
+
+    // ===== LOOKUP =====
+    async function lookupOrders() {
+      const phone = document.getElementById('phoneInput').value.trim();
+      const errEl = document.getElementById('lookupError');
+      errEl.classList.add('hidden');
+      if (!phone) { errEl.textContent='Masukkan nomor WhatsApp!'; errEl.classList.remove('hidden'); return; }
+
+      try {
+        const digits = phone.replace(/\D/g,'');
+        const res = await fetch(`/api/orders/by-phone/${digits}`);
+        const orders = await res.json();
+        if (!orders.length) {
+          errEl.textContent='Tidak ada pesanan yang ditemukan untuk nomor ini.';
+          errEl.classList.remove('hidden'); return;
+        }
+        currentOrders = orders;
+        showAccountScreen(orders);
+      } catch(e) { errEl.textContent='Koneksi bermasalah, coba lagi.'; errEl.classList.remove('hidden'); }
+    }
+
+    async function lookupById() {
+      const id = document.getElementById('orderIdInput').value.trim();
+      const errEl = document.getElementById('lookupError');
+      errEl.classList.add('hidden');
+      if (!id) { errEl.textContent='Masukkan nomor pesanan!'; errEl.classList.remove('hidden'); return; }
+
+      try {
+        const res = await fetch(`/api/orders/${id}`);
+        if (!res.ok) { errEl.textContent='Pesanan tidak ditemukan.'; errEl.classList.remove('hidden'); return; }
+        const order = await res.json();
+        currentOrders = [order];
+        showAccountScreen([order]);
+      } catch(e) { errEl.textContent='Koneksi bermasalah.'; errEl.classList.remove('hidden'); }
+    }
+
+    function showAccountScreen(orders) {
+      const first = orders[0];
+      document.getElementById('lookupScreen').classList.add('hidden');
+      document.getElementById('accountScreen').classList.remove('hidden');
+
+      // Profile
+      document.getElementById('profileAvatar').textContent = first.customer_name.charAt(0).toUpperCase();
+      document.getElementById('profileName').textContent = first.customer_name;
+      document.getElementById('profilePhone').innerHTML = `<i class="fas fa-phone mr-1 text-accent"></i>${first.customer_phone||'-'}`;
+      if (first.customer_email) document.getElementById('profileEmail').innerHTML = `<i class="fas fa-envelope mr-1 text-accent"></i>${first.customer_email}`;
+      document.getElementById('statTotal').textContent = orders.length;
+      document.getElementById('statDone').textContent  = orders.filter(o=>o.status==='completed').length;
+
+      renderOrders(orders);
+    }
+
+    function renderOrders(orders) {
+      const groups = { processing:[], shipped:[], completed:[] };
+      orders.forEach(o => {
+        if (o.status==='completed') groups.completed.push(o);
+        else if (o.status==='shipped') groups.shipped.push(o);
+        else groups.processing.push(o); // pending, processing, cancelled
+      });
+
+      // Update counts
+      document.getElementById('cnt-processing').textContent = groups.processing.length;
+      document.getElementById('cnt-shipped').textContent    = groups.shipped.length;
+      document.getElementById('cnt-completed').textContent  = groups.completed.length;
+
+      // Render each tab
+      document.getElementById('list-processing').innerHTML = groups.processing.length
+        ? groups.processing.map(o => renderOrderCard(o)).join('')
+        : emptyState('fas fa-clock','Tidak ada pesanan yang sedang diproses');
+
+      document.getElementById('list-shipped').innerHTML = groups.shipped.length
+        ? groups.shipped.map(o => renderOrderCard(o)).join('')
+        : emptyState('fas fa-truck','Tidak ada pesanan yang sedang dikirim');
+
+      document.getElementById('list-completed').innerHTML = groups.completed.length
+        ? groups.completed.map(o => renderOrderCard(o)).join('')
+        : emptyState('fas fa-check-circle','Belum ada pesanan yang selesai');
+    }
+
+    function emptyState(icon, msg) {
+      return `<div class="text-center py-14 text-gray-300"><i class="${icon} text-5xl mb-4 block"></i><p class="text-gray-400 text-sm">${msg}</p></div>`;
+    }
+
+    function renderOrderCard(o) {
+      const reviewed = JSON.parse(o.reviewed_items||'[]');
+      const allReviewed = o.items.every(i => reviewed.includes(i.name));
+      const statusInfo = getStatusInfo(o.status);
+      const date = new Date(o.created_at).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+
+      return `
+        <div class="bg-white rounded-2xl shadow-sm border border-brd overflow-hidden slide-up">
+          <!-- Order header -->
+          <div class="flex items-center justify-between px-5 py-3.5 bg-bgsec border-b border-brd flex-wrap gap-2">
+            <div class="flex items-center gap-3">
+              <span class="font-mono text-sm font-bold text-accent">#${o.id}</span>
+              <span class="text-xs text-gray-400">${date}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs px-3 py-1 rounded-full font-medium ${statusInfo.cls}">
+                <i class="${statusInfo.icon} mr-1"></i>${statusInfo.label}
+              </span>
+            </div>
+          </div>
+
+          <!-- Progress stepper -->
+          <div class="px-5 py-4 border-b border-brd">
+            ${renderStepper(o.status)}
+          </div>
+
+          <!-- Items -->
+          <div class="px-5 py-4 space-y-2.5">
+            ${o.items.map(item => `
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div class="w-9 h-9 bg-primary/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-bread-slice text-accent text-xs"></i>
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-sm font-medium truncate">${item.name}</p>
+                    <p class="text-xs text-gray-400">${item.qty}x × Rp ${item.price.toLocaleString('id-ID')}</p>
+                  </div>
+                </div>
+                <p class="text-sm font-bold text-accent flex-shrink-0">Rp ${(item.price*item.qty).toLocaleString('id-ID')}</p>
+              </div>
+            `).join('')}
+          </div>
+
+          <!-- Footer -->
+          <div class="px-5 py-3.5 bg-bgsec border-t border-brd flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <span class="text-xs text-gray-400">Total Pembayaran</span>
+              <p class="font-bold text-accent text-lg">Rp ${o.total.toLocaleString('id-ID')}</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="showDetail(${o.id})" class="border border-brd text-gray-600 hover:border-accent hover:text-accent px-4 py-2 rounded-xl text-xs font-medium transition-colors">
+                <i class="fas fa-eye mr-1"></i>Detail
+              </button>
+              ${o.status==='completed' && !allReviewed
+                ? `<button onclick="openReviewModal(${o.id})" class="bg-yellow hover:bg-accent hover:text-white text-dark px-4 py-2 rounded-xl text-xs font-bold transition-all">
+                    <i class="fas fa-star mr-1"></i>Beri Penilaian
+                   </button>`
+                : o.status==='completed' && allReviewed
+                  ? `<span class="text-xs text-green-600 flex items-center gap-1 px-3"><i class="fas fa-check-circle"></i>Sudah Dinilai</span>`
+                  : ''
+              }
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderStepper(status) {
+      const steps = [
+        { key:'pending',    label:'Pesanan Masuk', icon:'fas fa-receipt' },
+        { key:'processing', label:'Diproses',      icon:'fas fa-fire' },
+        { key:'shipped',    label:'Dikirim',        icon:'fas fa-truck' },
+        { key:'completed',  label:'Selesai',        icon:'fas fa-check-circle' },
+      ];
+      const order = ['pending','processing','shipped','completed'];
+      const currentIdx = order.indexOf(status);
+
+      return `<div class="flex items-center justify-between">` +
+        steps.map((step, i) => {
+          const isDone   = i < currentIdx;
+          const isActive = i === currentIdx;
+          const cls = isDone ? 'step-done' : isActive ? 'step-active' : '';
+          const dotCls = isDone ? 'bg-accent border-accent text-white' : isActive ? 'bg-white border-accent text-accent' : 'bg-white border-brd text-gray-300';
+          const labelCls = isDone || isActive ? 'text-accent font-semibold' : 'text-gray-300';
+          const lineCls = isDone ? 'bg-accent' : 'bg-brd';
+          const isLast = i === steps.length - 1;
+
+          return `
+            <div class="flex flex-col items-center flex-1 ${cls}">
+              <div class="relative w-full flex items-center justify-center">
+                ${i > 0 ? `<div class="absolute right-1/2 w-full h-0.5 ${lineCls} top-1/2 -translate-y-1/2 z-0"></div>` : ''}
+                <div class="w-8 h-8 rounded-full border-2 ${dotCls} flex items-center justify-center z-10 relative text-xs transition-all duration-300">
+                  ${isDone ? '<i class="fas fa-check text-xs"></i>' : `<i class="${step.icon} text-xs"></i>`}
+                </div>
+              </div>
+              <p class="text-xs mt-1.5 text-center ${labelCls} leading-tight max-w-[56px]">${step.label}</p>
+            </div>
+          `;
+        }).join('') +
+      `</div>`;
+    }
+
+    function getStatusInfo(status) {
+      const map = {
+        pending:    { label:'Menunggu',  icon:'fas fa-hourglass-half', cls:'bg-yellow/30 text-yellow-700' },
+        processing: { label:'Diproses',  icon:'fas fa-fire',           cls:'bg-orange-100 text-orange-600' },
+        shipped:    { label:'Dikirim',   icon:'fas fa-truck',          cls:'bg-blue-100 text-blue-600' },
+        completed:  { label:'Selesai',   icon:'fas fa-check-circle',   cls:'bg-green-100 text-green-700' },
+        cancelled:  { label:'Dibatalkan',icon:'fas fa-times-circle',   cls:'bg-red-100 text-red-600' },
+      };
+      return map[status] || map.pending;
+    }
+
+    // ===== TAB SWITCH =====
+    function switchTab(tab, btn) {
+      document.querySelectorAll('.order-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(`tab-${tab}`).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    // ===== REVIEW MODAL =====
+    function openReviewModal(orderId) {
+      const order = currentOrders.find(o => o.id === orderId);
+      if (!order) return;
+      currentOrderId = orderId;
+      const reviewed = JSON.parse(order.reviewed_items||'[]');
+      const unreviewed = order.items.filter(i => !reviewed.includes(i.name));
+
+      document.getElementById('reviewModalOrderId').textContent = `Pesanan #${orderId}`;
+      document.getElementById('reviewSuccessMsg').classList.add('hidden');
+
+      document.getElementById('reviewItemsList').innerHTML = unreviewed.map((item, idx) => `
+        <div class="border border-brd rounded-2xl p-4 space-y-3" id="reviewItem-${idx}">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 bg-primary/30 rounded-lg flex items-center justify-center"><i class="fas fa-bread-slice text-accent text-xs"></i></div>
+            <p class="font-semibold text-sm">${item.name}</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500 mb-1">Rating</p>
+            <div class="rating-row" id="stars-${idx}">
+              <input type="radio" id="r${idx}s5" name="rating-${idx}" value="5"><label for="r${idx}s5">★</label>
+              <input type="radio" id="r${idx}s4" name="rating-${idx}" value="4"><label for="r${idx}s4">★</label>
+              <input type="radio" id="r${idx}s3" name="rating-${idx}" value="3"><label for="r${idx}s3">★</label>
+              <input type="radio" id="r${idx}s2" name="rating-${idx}" value="2"><label for="r${idx}s2">★</label>
+              <input type="radio" id="r${idx}s1" name="rating-${idx}" value="1"><label for="r${idx}s1">★</label>
+            </div>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500 mb-1">Ulasan</p>
+            <textarea id="reviewText-${idx}" rows="2" class="w-full border border-brd rounded-xl px-3 py-2 text-sm outline-none focus:border-accent resize-none" placeholder="Bagikan pengalaman Anda..."></textarea>
+          </div>
+          <button onclick="submitSingleReview(${orderId}, '${item.name.replace(/'/g,"\\'")}', ${idx})"
+            class="w-full bg-accent hover:bg-yellow hover:text-dark text-white py-2 rounded-xl text-sm font-bold transition-all">
+            <i class="fas fa-paper-plane mr-1"></i>Kirim Penilaian
+          </button>
+        </div>
+      `).join('');
+
+      document.getElementById('reviewModal').classList.add('open');
+    }
+
+    async function submitSingleReview(orderId, productName, idx) {
+      const ratingEl = document.querySelector(`input[name="rating-${idx}"]:checked`);
+      const text = document.getElementById(`reviewText-${idx}`).value.trim();
+      if (!ratingEl) { alert('Pilih rating terlebih dahulu!'); return; }
+      if (!text)     { alert('Tuliskan ulasan Anda!'); return; }
+
+      const res = await fetch(`/api/orders/${orderId}/review`, {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify({ product: productName, rating: parseFloat(ratingEl.value), text })
+      });
+
+      if (res.ok) {
+        // Remove reviewed item card
+        const card = document.getElementById(`reviewItem-${idx}`);
+        card.innerHTML = `<div class="text-center py-4 text-green-600 text-sm"><i class="fas fa-check-circle text-xl mb-1 block"></i>Penilaian untuk <b>${productName}</b> berhasil dikirim!</div>`;
+
+        // Update local state
+        const order = currentOrders.find(o => o.id === orderId);
+        if (order) {
+          const rev = JSON.parse(order.reviewed_items||'[]');
+          rev.push(productName);
+          order.reviewed_items = JSON.stringify(rev);
+        }
+
+        // Check if all reviewed
+        const remaining = document.querySelectorAll('#reviewItemsList button');
+        if (!remaining.length) {
+          document.getElementById('reviewSuccessMsg').classList.remove('hidden');
+          setTimeout(() => { closeReviewModal(); renderOrders(currentOrders); }, 1800);
+        }
+      } else {
+        const err = await res.json();
+        alert(err.error || 'Gagal mengirim penilaian.');
+      }
+    }
+
+    function closeReviewModal() { document.getElementById('reviewModal').classList.remove('open'); }
+
+    // ===== DETAIL MODAL =====
+    function showDetail(orderId) {
+      const order = currentOrders.find(o => o.id === orderId);
+      if (!order) return;
+      const statusInfo = getStatusInfo(order.status);
+      const date = new Date(order.created_at).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+
+      document.getElementById('detailContent').innerHTML = `
+        <div class="space-y-5">
+          <div class="flex items-center justify-between">
+            <div><p class="text-xs text-gray-400">Nomor Pesanan</p><p class="font-mono font-bold text-accent text-lg">#${order.id}</p></div>
+            <span class="text-xs px-3 py-1.5 rounded-full font-medium ${statusInfo.cls}"><i class="${statusInfo.icon} mr-1"></i>${statusInfo.label}</span>
+          </div>
+
+          <div class="bg-bgsec rounded-2xl p-4 space-y-1.5">
+            <p class="text-xs font-semibold text-dark mb-2 uppercase tracking-wide">Informasi Pembeli</p>
+            <p class="text-sm"><i class="fas fa-user mr-2 text-accent"></i>${order.customer_name}</p>
+            <p class="text-sm"><i class="fas fa-phone mr-2 text-accent"></i>${order.customer_phone||'-'}</p>
+            ${order.customer_email?`<p class="text-sm"><i class="fas fa-envelope mr-2 text-accent"></i>${order.customer_email}</p>`:''}
+            ${order.notes?`<p class="text-sm"><i class="fas fa-sticky-note mr-2 text-accent"></i>${order.notes}</p>`:''}
+          </div>
+
+          <div>
+            <p class="text-xs font-semibold text-dark mb-3 uppercase tracking-wide">Item Pesanan</p>
+            <div class="space-y-2.5">
+              ${order.items.map(i => `
+                <div class="flex items-center justify-between gap-3 p-3 bg-bgsec rounded-xl border border-brd">
+                  <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-8 h-8 bg-primary/30 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fas fa-bread-slice text-accent text-xs"></i></div>
+                    <div><p class="text-sm font-medium">${i.name}</p><p class="text-xs text-gray-400">${i.qty}x × Rp ${i.price.toLocaleString('id-ID')}</p></div>
+                  </div>
+                  <p class="font-bold text-accent text-sm flex-shrink-0">Rp ${(i.price*i.qty).toLocaleString('id-ID')}</p>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="flex justify-between items-center border-t border-brd pt-4">
+            <span class="text-sm text-gray-500">Total Pembayaran</span>
+            <span class="font-bold text-accent text-xl">Rp ${order.total.toLocaleString('id-ID')}</span>
+          </div>
+
+          <div class="text-xs text-gray-400 text-center"><i class="fas fa-clock mr-1"></i>Dipesan: ${date}</div>
+
+          <div class="pt-2">${renderStepper(order.status)}</div>
+        </div>
+      `;
+      document.getElementById('detailModal').classList.add('open');
+    }
+
+    function closeDetailModal() { document.getElementById('detailModal').classList.remove('open'); }
+
+    // Close modals on outside click
+    document.getElementById('reviewModal').addEventListener('click', e => { if (e.target===e.currentTarget) closeReviewModal(); });
+    document.getElementById('detailModal').addEventListener('click', e => { if (e.target===e.currentTarget) closeDetailModal(); });
+
+    // ===== LOGOUT (back to lookup) =====
+    function logout() {
+      currentOrders = [];
+      currentOrderId = null;
+      document.getElementById('accountScreen').classList.add('hidden');
+      document.getElementById('lookupScreen').classList.remove('hidden');
+      document.getElementById('phoneInput').value = '';
+      document.getElementById('orderIdInput').value = '';
+    }
+
+    // ===== CART =====
+    function updateCartUI() {
+      const count = cart.reduce((s,i)=>s+i.qty,0);
+      const total = cart.reduce((s,i)=>s+i.price*i.qty,0);
+      document.getElementById('cartCount').textContent = count;
+      document.getElementById('cartTotal').textContent = `Rp ${total.toLocaleString('id-ID')}`;
+      const el = document.getElementById('cartItems');
+      if (!cart.length) { el.innerHTML='<div class="text-center py-10 text-gray-300"><i class="fas fa-shopping-cart text-4xl mb-3 block"></i><p class="text-sm">Keranjang kosong</p></div>'; return; }
+      el.innerHTML = cart.map(i => `
+        <div class="flex gap-3 items-center p-3 bg-bgsec rounded-xl border border-brd">
+          <img src="${i.image||'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=80'}" class="w-12 h-12 object-cover rounded-lg flex-shrink-0"/>
+          <div class="flex-1 min-w-0"><p class="font-medium text-sm truncate">${i.name}</p><p class="text-accent text-xs font-bold">${i.qty}x Rp ${i.price.toLocaleString('id-ID')}</p></div>
+        </div>
+      `).join('');
+    }
+    function toggleCart() {
+      const sb = document.getElementById('cartSidebar');
+      const ov = document.getElementById('cartOverlay');
+      const isOpen = sb.style.transform === 'translateX(0%)';
+      sb.style.transform = isOpen ? 'translateX(100%)' : 'translateX(0%)';
+      ov.classList.toggle('hidden', isOpen);
+    }
+
+    // Check URL params for auto-lookup
+    const urlParams = new URLSearchParams(window.location.search);
+    const autoPhone = urlParams.get('phone');
+    const autoId    = urlParams.get('order');
+    if (autoPhone) {
+      document.getElementById('phoneInput').value = autoPhone;
+      setTimeout(lookupOrders, 300);
+    } else if (autoId) {
+      document.getElementById('orderIdInput').value = autoId;
+      setTimeout(lookupById, 300);
+    }
+
+    // Load notice bar
+    fetch('/api/auth/settings').then(r=>r.json()).then(s=>{
+      if (s.notice_bar) document.getElementById('noticeBar').textContent=s.notice_bar;
+    }).catch(()=>{});
+
+    updateCartUI();
+  </script>
+</body>
+</html>

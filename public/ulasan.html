@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ulasan - Bakery Delight</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet"/>
+  <script>tailwind.config={theme:{extend:{colors:{primary:'#f8a5a5',accent:'#e77e7e',yellow:'#f5cd79',dark:'#333333',bgmain:'#fffaf5',bgsec:'#fff5f0',brd:'#e8d5d0'}}}}</script>
+  <style>
+    body{font-family:'Lato',sans-serif;background:#fffaf5;}
+    .rating-stars{display:flex;flex-direction:row-reverse;justify-content:flex-end;}
+    .rating-stars input{display:none;}
+    .rating-stars label{cursor:pointer;color:#d1d5db;font-size:1.8rem;line-height:1;}
+    .rating-stars input:checked~label,.rating-stars label:hover,.rating-stars label:hover~label{color:#f5cd79;}
+  </style>
+</head>
+<body class="text-dark">
+  <div id="noticeBar" class="bg-accent text-white text-center text-sm py-2 px-4"></div>
+  <header class="bg-white shadow-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="flex items-center justify-between h-16">
+        <a href="/" class="font-serif text-2xl font-bold"><span class="text-accent">Bakery</span><span class="text-yellow">Delight</span></a>
+        <nav class="hidden md:flex items-center gap-8">
+          <a href="/"        class="text-dark hover:text-accent text-sm">Beranda</a>
+          <a href="/produk"  class="text-dark hover:text-accent text-sm">Produk</a>
+          <a href="/tentang" class="text-dark hover:text-accent text-sm">Tentang Kami</a>
+          <a href="/ulasan"  class="text-accent font-semibold border-b-2 border-accent pb-1 text-sm">Ulasan</a>
+          <a href="/galeri"  class="text-dark hover:text-accent text-sm">Gallery</a>
+        </nav>
+        <button class="md:hidden" onclick="document.getElementById('mobileNav').classList.toggle('hidden')"><i class="fas fa-bars text-xl"></i></button>
+      </div>
+    </div>
+    <div id="mobileNav" class="hidden md:hidden bg-white border-t px-4 py-3 space-y-1">
+      <a href="/"        class="block py-2 text-dark text-sm">Beranda</a>
+      <a href="/produk"  class="block py-2 text-dark text-sm">Produk</a>
+      <a href="/tentang" class="block py-2 text-dark text-sm">Tentang Kami</a>
+      <a href="/ulasan"  class="block py-2 text-accent font-semibold text-sm">Ulasan</a>
+      <a href="/galeri"  class="block py-2 text-dark text-sm">Gallery</a>
+    </div>
+  </header>
+
+  <div class="bg-dark text-white py-10 text-center">
+    <h1 class="font-serif text-4xl font-bold">Ulasan Pelanggan</h1>
+    <p class="text-white/60 mt-2 text-sm">Apa kata pelanggan setia kami</p>
+  </div>
+
+  <!-- Stats -->
+  <section class="bg-accent text-white py-10">
+    <div class="max-w-4xl mx-auto px-4 grid grid-cols-3 gap-6 text-center">
+      <div><p id="avgRating" class="text-4xl font-bold font-serif">5.0</p><p class="text-white/70 text-sm mt-1">Rating Rata-rata</p></div>
+      <div><p id="totalReviews" class="text-4xl font-bold font-serif">0</p><p class="text-white/70 text-sm mt-1">Total Ulasan</p></div>
+      <div><p class="text-4xl font-bold font-serif">100%</p><p class="text-white/70 text-sm mt-1">Pelanggan Puas</p></div>
+    </div>
+  </section>
+
+  <section class="max-w-7xl mx-auto px-4 py-16">
+    <div id="reviewsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+  </section>
+
+  <!-- Add Review -->
+  <section class="bg-bgsec py-16 border-t border-brd">
+    <div class="max-w-2xl mx-auto px-4">
+      <div class="text-center mb-8">
+        <h2 class="font-serif text-3xl font-bold text-dark">Tambahkan Ulasan Anda</h2>
+        <div class="w-12 h-1 bg-accent mx-auto mt-3"></div>
+      </div>
+      <div class="bg-white rounded-2xl p-8 shadow-sm border border-brd">
+        <div id="successMsg" class="hidden bg-green-100 border border-green-300 text-green-700 rounded-xl p-4 mb-5 text-sm text-center">
+          <i class="fas fa-check-circle mr-2"></i>Ulasan berhasil dikirim! Terima kasih.
+        </div>
+        <div class="space-y-5">
+          <div>
+            <label class="block text-sm font-semibold mb-1 text-dark">Nama Lengkap <span class="text-accent">*</span></label>
+            <input id="rName" type="text" class="w-full border border-brd rounded-xl px-4 py-3 text-sm outline-none focus:border-accent" placeholder="Nama Anda"/>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-1 text-dark">Produk yang Diulas <span class="text-accent">*</span></label>
+            <select id="rProduct" class="w-full border border-brd rounded-xl px-4 py-3 text-sm outline-none focus:border-accent bg-white">
+              <option value="">Pilih Produk</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-2 text-dark">Rating <span class="text-accent">*</span></label>
+            <div class="rating-stars">
+              <input type="radio" id="star5" name="rating" value="5"><label for="star5">★</label>
+              <input type="radio" id="star4" name="rating" value="4"><label for="star4">★</label>
+              <input type="radio" id="star3" name="rating" value="3"><label for="star3">★</label>
+              <input type="radio" id="star2" name="rating" value="2"><label for="star2">★</label>
+              <input type="radio" id="star1" name="rating" value="1"><label for="star1">★</label>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-1 text-dark">Ulasan <span class="text-accent">*</span></label>
+            <textarea id="rText" rows="4" class="w-full border border-brd rounded-xl px-4 py-3 text-sm outline-none focus:border-accent resize-none" placeholder="Bagikan pengalaman Anda..."></textarea>
+          </div>
+          <button onclick="submitReview()" class="w-full bg-accent hover:bg-yellow hover:text-dark text-white py-3 rounded-xl font-bold transition-all">
+            <i class="fas fa-paper-plane mr-2"></i>Kirim Ulasan
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="bg-dark text-white py-8">
+    <div class="text-center text-white/40 text-xs">&copy; 2025 Bakery Delight. All Rights Reserved.</div>
+  </footer>
+
+  <script>
+    async function loadReviews() {
+      const res = await fetch('/api/reviews?approved=1');
+      const reviews = await res.json();
+      document.getElementById('totalReviews').textContent = reviews.length;
+      if (reviews.length) {
+        const avg = reviews.reduce((s,r)=>s+r.rating,0)/reviews.length;
+        document.getElementById('avgRating').textContent = avg.toFixed(1);
+      }
+      const grid = document.getElementById('reviewsGrid');
+      if (!reviews.length) { grid.innerHTML='<p class="col-span-3 text-center text-gray-400 py-10">Belum ada ulasan</p>'; return; }
+      grid.innerHTML = reviews.map(r => `
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-brd hover:shadow-md transition-shadow">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-11 h-11 bg-accent text-white rounded-full flex items-center justify-center font-bold text-lg">${r.name.charAt(0)}</div>
+            <div><p class="font-bold text-dark">${r.name}</p><p class="text-xs text-gray-400">${r.date}</p></div>
+          </div>
+          <div class="text-yellow text-xl mb-3">${'★'.repeat(Math.floor(r.rating))}</div>
+          <p class="text-gray-600 text-sm italic leading-relaxed">"${r.text}"</p>
+          <p class="text-xs text-accent mt-4 font-semibold"><i class="fas fa-shopping-bag mr-1"></i>${r.product}</p>
+        </div>
+      `).join('');
+    }
+
+    async function loadProducts() {
+      const res = await fetch('/api/products');
+      const products = await res.json();
+      const sel = document.getElementById('rProduct');
+      products.forEach(p => { const o=document.createElement('option'); o.value=p.name; o.textContent=p.name; sel.appendChild(o); });
+    }
+
+    async function submitReview() {
+      const name = document.getElementById('rName').value.trim();
+      const product = document.getElementById('rProduct').value;
+      const ratingEl = document.querySelector('input[name="rating"]:checked');
+      const text = document.getElementById('rText').value.trim();
+      if (!name||!product||!ratingEl||!text) { alert('Harap isi semua field!'); return; }
+      const res = await fetch('/api/reviews', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({name,product,rating:parseFloat(ratingEl.value),text})
+      });
+      if (res.ok) {
+        document.getElementById('successMsg').classList.remove('hidden');
+        document.getElementById('rName').value='';
+        document.getElementById('rProduct').value='';
+        document.getElementById('rText').value='';
+        if(ratingEl) ratingEl.checked=false;
+        loadReviews();
+        setTimeout(()=>document.getElementById('successMsg').classList.add('hidden'),4000);
+      }
+    }
+
+    fetch('/api/auth/settings').then(r=>r.json()).then(s=>{if(s.notice_bar)document.getElementById('noticeBar').textContent=s.notice_bar;}).catch(()=>{});
+    loadReviews(); loadProducts();
+  </script>
+</body>
+</html>

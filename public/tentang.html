@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tentang Kami - Bakery Delight</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+  <script>tailwind.config={theme:{extend:{colors:{primary:'#c8873a',dark:'#2c1a0e',cream:'#fdf6ee',accent:'#e8a55a'}}}}</script>
+  <style>body{font-family:'Lato',sans-serif}</style>
+</head>
+<body class="bg-cream">
+  <div id="noticeBar" class="bg-primary text-white text-center text-sm py-2 px-4"></div>
+  <header class="bg-white shadow-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="flex items-center justify-between h-16">
+        <a href="/" class="font-serif text-2xl font-bold text-dark" style="font-family:'Playfair Display',serif">Bakery<span class="text-primary">Delight</span></a>
+        <nav class="hidden md:flex items-center gap-8">
+          <a href="/" class="text-dark hover:text-primary">Beranda</a>
+          <a href="/produk" class="text-dark hover:text-primary">Produk</a>
+          <a href="/tentang" class="text-primary font-semibold border-b-2 border-primary pb-1">Tentang Kami</a>
+          <a href="/ulasan" class="text-dark hover:text-primary">Ulasan</a>
+          <a href="/galeri" class="text-dark hover:text-primary">Gallery</a>
+        </nav>
+        <button class="md:hidden text-dark" onclick="document.getElementById('mobileNav').classList.toggle('hidden')"><i class="fas fa-bars text-xl"></i></button>
+      </div>
+    </div>
+    <div id="mobileNav" class="hidden md:hidden bg-white border-t px-4 py-3 space-y-2">
+      <a href="/" class="block py-2 text-dark">Beranda</a>
+      <a href="/produk" class="block py-2 text-dark">Produk</a>
+      <a href="/tentang" class="block py-2 text-primary font-semibold">Tentang Kami</a>
+      <a href="/ulasan" class="block py-2 text-dark">Ulasan</a>
+      <a href="/galeri" class="block py-2 text-dark">Gallery</a>
+    </div>
+  </header>
+
+  <div class="bg-dark text-white py-12 text-center">
+    <h1 class="font-serif text-4xl font-bold" style="font-family:'Playfair Display',serif">Tentang Kami</h1>
+    <p class="text-white/60 mt-2">Cerita di balik setiap roti kami</p>
+  </div>
+
+  <section class="max-w-7xl mx-auto px-4 py-20">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      <div>
+        <p class="text-primary font-sans tracking-widest text-sm uppercase mb-3">Sejak 2010</p>
+        <h2 class="font-serif text-4xl font-bold text-dark mb-6 leading-tight" style="font-family:'Playfair Display',serif">Kecintaan Kami<br/>pada Roti Berkualitas</h2>
+        <p class="text-gray-600 leading-relaxed mb-4">Bakery Delight didirikan pada tahun 2010 dengan satu misi sederhana: menghadirkan roti segar berkualitas tinggi ke meja makan keluarga Indonesia setiap hari.</p>
+        <p class="text-gray-600 leading-relaxed mb-6">Dengan menggunakan bahan-bahan pilihan tanpa pengawet berbahaya, kami berkomitmen untuk selalu menghadirkan produk yang sehat, lezat, dan terjangkau untuk semua kalangan.</p>
+        <div class="grid grid-cols-3 gap-4">
+          <div class="text-center p-4 bg-white rounded-2xl shadow-sm">
+            <p class="font-serif text-3xl font-bold text-primary" style="font-family:'Playfair Display',serif">15+</p>
+            <p class="text-sm text-gray-500 mt-1">Tahun Berpengalaman</p>
+          </div>
+          <div class="text-center p-4 bg-white rounded-2xl shadow-sm">
+            <p class="font-serif text-3xl font-bold text-primary" style="font-family:'Playfair Display',serif">50+</p>
+            <p class="text-sm text-gray-500 mt-1">Varian Produk</p>
+          </div>
+          <div class="text-center p-4 bg-white rounded-2xl shadow-sm">
+            <p class="font-serif text-3xl font-bold text-primary" style="font-family:'Playfair Display',serif">5K+</p>
+            <p class="text-sm text-gray-500 mt-1">Pelanggan Setia</p>
+          </div>
+        </div>
+      </div>
+      <div class="relative">
+        <img src="https://images.unsplash.com/photo-1556909211-36987daf7b4d?w=600" alt="Bakery" class="rounded-2xl shadow-xl w-full object-cover h-96" />
+        <div class="absolute -bottom-6 -left-6 bg-primary text-white rounded-2xl p-6 shadow-xl">
+          <p class="font-serif text-2xl font-bold" style="font-family:'Playfair Display',serif">100%</p>
+          <p class="text-white/80 text-sm">Bahan Alami</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Values -->
+  <section class="bg-white py-16">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="text-center mb-12">
+        <h2 class="font-serif text-3xl font-bold text-dark" style="font-family:'Playfair Display',serif">Nilai-Nilai Kami</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="text-center p-8">
+          <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-heart text-primary text-2xl"></i></div>
+          <h3 class="font-serif text-xl font-bold mb-3" style="font-family:'Playfair Display',serif">Dibuat dengan Cinta</h3>
+          <p class="text-gray-600 text-sm leading-relaxed">Setiap produk dibuat dengan penuh cinta dan dedikasi oleh tim baker berpengalaman kami.</p>
+        </div>
+        <div class="text-center p-8">
+          <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-leaf text-primary text-2xl"></i></div>
+          <h3 class="font-serif text-xl font-bold mb-3" style="font-family:'Playfair Display',serif">Bahan Alami</h3>
+          <p class="text-gray-600 text-sm leading-relaxed">Kami hanya menggunakan bahan-bahan alami pilihan tanpa pengawet kimia berbahaya.</p>
+        </div>
+        <div class="text-center p-8">
+          <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-award text-primary text-2xl"></i></div>
+          <h3 class="font-serif text-xl font-bold mb-3" style="font-family:'Playfair Display',serif">Kualitas Terjamin</h3>
+          <p class="text-gray-600 text-sm leading-relaxed">Standar kualitas kami tidak pernah berkompromi. Setiap produk dicek sebelum sampai ke tangan Anda.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Map & Contact -->
+  <section class="max-w-7xl mx-auto px-4 py-16">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+      <div>
+        <h2 class="font-serif text-3xl font-bold text-dark mb-6" style="font-family:'Playfair Display',serif">Kunjungi Kami</h2>
+        <div class="space-y-4 mb-6">
+          <div class="flex items-start gap-4"><div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0"><i class="fas fa-map-marker-alt text-primary"></i></div><div><p class="font-semibold">Alamat</p><p id="storeAddress" class="text-gray-600 text-sm mt-1">Jl. A.M. Sangaji No.47, Cokrodiningratan, Kec. Jetis, Kota Yogyakarta</p></div></div>
+          <div class="flex items-start gap-4"><div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0"><i class="fas fa-phone text-primary"></i></div><div><p class="font-semibold">Telepon</p><p id="storePhone" class="text-gray-600 text-sm mt-1">+62 123 4567 890</p></div></div>
+          <div class="flex items-start gap-4"><div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0"><i class="fas fa-clock text-primary"></i></div><div><p class="font-semibold">Jam Buka</p><p id="storeHours" class="text-gray-600 text-sm mt-1">Setiap Hari: 07.00 - 21.00</p></div></div>
+        </div>
+      </div>
+      <div class="rounded-2xl overflow-hidden shadow-lg h-72">
+        <iframe width="100%" height="100%" frameborder="0" scrolling="no" src="https://maps.google.com/maps?width=100%25&height=300&hl=en&q=Jl.%20A.M.%20Sangaji%20No.47,%20Yogyakarta&t=&z=15&ie=UTF8&iwloc=B&output=embed"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <footer class="bg-dark text-white py-10">
+    <div class="max-w-7xl mx-auto px-4 text-center text-white/40 text-sm">
+      <p>&copy; 2025 Bakery Delight. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    fetch('/api/auth/settings').then(r => r.json()).then(s => {
+      if (s.notice_bar) document.getElementById('noticeBar').textContent = s.notice_bar;
+      if (s.store_address) document.getElementById('storeAddress').textContent = s.store_address;
+      if (s.store_phone) document.getElementById('storePhone').textContent = s.store_phone;
+      if (s.store_hours) document.getElementById('storeHours').textContent = `Setiap Hari: ${s.store_hours}`;
+    });
+  </script>
+</body>
+</html>
